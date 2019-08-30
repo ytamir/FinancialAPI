@@ -65,9 +65,8 @@ well_status_options = [{'label': str(a),
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-server = app.server
+app = dash.Dash(__name__,external_stylesheets=external_stylesheets)
+application = app.server
 
 app.layout = html.Div(children=[
     html.H1(children='AAPL', id='name'),
@@ -96,18 +95,18 @@ app.layout = html.Div(children=[
                Output('name','children')],              
               [Input('submit-button', 'n_clicks')],
               [State('well_statuses', 'value')])
-def update_output(n_clicks, input_symbol):
-    if input_symbol is not None:
-        newdf = Stocks.getdata(input_symbol)
-        print(newdf)
-        newdf.to_csv('test.csv')
-        fdd = pd.read_csv("test.csv")
-        #output_name = input_symbol.append(" Stock")
-        return {
-            'data': [
-                go.Scatter(x=fdd['Attributes'], y=fdd['High'])
-            ]
-        }, input_symbol
+def update_output(n_clicks, input_symbols):
+    if input_symbols is not None:
+        trace = []
+        myString = ', '.join(map(str, input_symbols))
+        for symbol in input_symbols:
+            newdf = Stocks.getdata(symbol)
+            print(newdf)
+            newdf.to_csv('test.csv')
+            fdd = pd.read_csv("test.csv")
+            #output_name = input_symbol.append(" Stock")
+            trace.append(go.Scatter(x=fdd['Date'], y=fdd['High'], name=symbol, mode='lines'))
+        return {"data": trace}, myString
     else:
         return {
                    'data': [
@@ -135,9 +134,5 @@ def update_output(n_clicks, input_symbol):
 #             ]
 #         }
 
-
-
-
-
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    application.run(debug=True, port=8080)
