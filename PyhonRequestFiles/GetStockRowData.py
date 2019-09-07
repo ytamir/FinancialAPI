@@ -28,11 +28,10 @@ class StockRowData:
 
         download_url = "https://stockrow.com/api/companies/" + stock_symbol + "/financials.xlsx?dimension=" \
                        + frequency + "&" + "section=" + type + "&sort=desc"
-        file_dir = "StockRowData\\"
+        file_dir = "..\\QuarterlyAnnualData\\"
 
         temp_name = "Metrics" if SheetType.METRICS == type else type.split('%')[0] + type.split('0')[1]
         file_path = file_dir + "\\" + stock_symbol + temp_name + frequency[2] + ".xlsx"
-
         if os.path.exists(file_path):
             os.remove(file_path)
 
