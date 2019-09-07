@@ -31,7 +31,7 @@ class Stocks:
             print(df)
             return df
         except:
-            return pd.read_csv('aapl.csv')
+            return pd.read_csv('CSVFiles/aapl.csv')
 
         # df = web.DataReader(symbol, 'yahoo', start, end)
         # return df

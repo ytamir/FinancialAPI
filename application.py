@@ -1,13 +1,10 @@
-import os
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
-import dash_table
 # from GetStockRowData import StockRowData
 import plotly.graph_objs as go
-from stock import Stocks
+from PyhonRequestFiles.stock import Stocks
 from dash.dependencies import Input, Output, State
 
 
@@ -22,11 +19,11 @@ from dash.dependencies import Input, Output, State
 
 
 #df.to_csv('aapl.csv')
-fd = pd.read_csv("aapl.csv")
+fd = pd.read_csv("CSVFiles/aapl.csv")
 dff = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
 
-nasdaqdf = pd.read_csv("nasdaq.csv")
-nysedf = pd.read_csv("nyse.csv")
+nasdaqdf = pd.read_csv("CSVFiles/nasdaq.csv")
+nysedf = pd.read_csv("CSVFiles/nyse.csv")
 symbols = nysedf.Symbol.values.tolist() + nasdaqdf.Symbol.values.tolist()
 
 #print('fd')
@@ -102,8 +99,8 @@ def update_output(n_clicks, input_symbols):
         for symbol in input_symbols:
             newdf = Stocks.getdata(symbol)
             print(newdf)
-            newdf.to_csv('test.csv')
-            fdd = pd.read_csv("test.csv")
+            newdf.to_csv('CSVFiles/test.csv')
+            fdd = pd.read_csv("CSVFiles/test.csv")
             #output_name = input_symbol.append(" Stock")
             trace.append(go.Scatter(x=fdd['Date'], y=fdd['High'], name=symbol, mode='lines'))
         return {"data": trace}, myString
