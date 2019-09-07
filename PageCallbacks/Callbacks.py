@@ -1,6 +1,6 @@
 import dash
 from PageCallbacks import HomePageCallbacks
-from PageLayouts import HomePage, QuarterlyPage
+from PageLayouts import HomePageLayout, QuarterlyPageLayout
 
 
 def register_callbacks(app, init_stock, drop_down_symbols):
@@ -11,9 +11,9 @@ def register_callbacks(app, init_stock, drop_down_symbols):
     def page_control(pathname):
         print(pathname)
         if pathname == "/Quarterly":
-            return QuarterlyPage.construct_layout()
+            return QuarterlyPageLayout.construct_layout()
         else:
-            return HomePage.construct_layout(drop_down_symbols, init_stock)
+            return HomePageLayout.construct_layout(drop_down_symbols, init_stock)
 
     # Callbacks for Home Page
     HomePageCallbacks.register_homepage_callbacks(app, init_stock)

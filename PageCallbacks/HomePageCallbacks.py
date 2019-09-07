@@ -10,7 +10,7 @@ def register_homepage_callbacks(app, init_stock):
                    Output('symbol', 'children')],
                   [Input('submit-button', 'n_clicks')],
                   [State('drop_down_symbols', 'value')])
-    def update_output(n_clicks, input_symbols):
+    def plot_daily_high(n_clicks, input_symbols):
 
         if input_symbols is not None:
             trace = []
