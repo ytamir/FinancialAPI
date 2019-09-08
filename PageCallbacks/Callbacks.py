@@ -1,19 +1,19 @@
 import dash
 from PageCallbacks import HomePageCallbacks
-from PageLayouts import HomePageLayout, QuarterlyPageLayout
 
 
-def register_callbacks(app, init_stock, drop_down_symbols):
+def register_callbacks(app, init_stock):
 
     # Callbacks for App Control
-    @app.callback(dash.dependencies.Output('page-content', 'children'),
-                  [dash.dependencies.Input('url', 'pathname')])
-    def page_control(pathname):
-        print(pathname)
-        if pathname == "/Quarterly":
-            return QuarterlyPageLayout.construct_layout()
+    @app.callback([dash.dependencies.Output('home-page-content', 'style'),
+                   dash.dependencies.Output('financial-metrics-page-content', 'style'),
+                   dash.dependencies.Output('stock_state', 'children')],
+                  [dash.dependencies.Input('url', 'pathname'),
+                   dash.dependencies.Input('drop_down_symbols', 'value')])
+    def page_control(pathname, input_symbols):
+        if pathname == "/FinancialMetrics":
+            return {'display': 'none'}, {}, input_symbols
         else:
-            return HomePageLayout.construct_layout(drop_down_symbols, init_stock)
+            return {}, {'display': 'none'}, input_symbols
 
-    # Callbacks for Home Page
     HomePageCallbacks.register_homepage_callbacks(app, init_stock)

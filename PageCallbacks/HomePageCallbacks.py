@@ -12,7 +12,7 @@ def register_homepage_callbacks(app, init_stock):
                   [State('drop_down_symbols', 'value'),
                    State('radio-items', 'value')])
     def plot_daily_high(n_clicks, input_symbols, candle_val):
-
+        my_string = ''
         if input_symbols is not None:
             trace = []
             for symbol in input_symbols:
@@ -34,7 +34,7 @@ def register_homepage_callbacks(app, init_stock):
                 return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
                                                            xaxis={'rangeslider': {'visible': False},
                                                                   'autorange': True, },
-                                                           ## if rangeslider is True then cannot change y axis range
+                                                           # if rangeslider is True then cannot change y axis range
                                                            yaxis={"title": f'Stock Price (USD)'})}, my_string
             else:
                 return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
