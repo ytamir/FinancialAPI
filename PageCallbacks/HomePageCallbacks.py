@@ -4,9 +4,9 @@ from PyhonRequestFiles.stock import Stocks
 from dash.dependencies import Input, Output, State
 
 
-def register_homepage_callbacks(app, init_stock):
+def register_callbacks(app, init_stock):
 
-    @app.callback([Output('table', 'figure'),
+    @app.callback([Output('homepage-table', 'figure'),
                    Output('symbol', 'children')],
                   [Input('submit-button', 'n_clicks')],
                   [State('drop_down_symbols', 'value'),

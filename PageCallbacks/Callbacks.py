@@ -1,5 +1,5 @@
 import dash
-from PageCallbacks import HomePageCallbacks
+from PageCallbacks import HomePageCallbacks, FinancialMetricsCallbacks
 
 
 def register_callbacks(app, init_stock):
@@ -16,4 +16,5 @@ def register_callbacks(app, init_stock):
         else:
             return {}, {'display': 'none'}, input_symbols
 
-    HomePageCallbacks.register_homepage_callbacks(app, init_stock)
+    HomePageCallbacks.register_callbacks(app, init_stock)
+    FinancialMetricsCallbacks.register_callbacks(app, init_stock)

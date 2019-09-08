@@ -3,4 +3,4 @@ import plotly.graph_objs as go
 
 
 def construct_layout(init_stock):
-    return [dcc.Graph(id='table', figure={'data': [go.Scatter(x=init_stock['Date'], y=init_stock['High'])]})]
+    return [dcc.Graph(id='homepage-table', figure={'data': [go.Scatter(x=init_stock['Date'], y=init_stock['High'])]})]

@@ -28,12 +28,10 @@ class StockRowData:
 
         download_url = "https://stockrow.com/api/companies/" + stock_symbol + "/financials.xlsx?dimension=" \
                        + frequency + "&" + "section=" + type + "&sort=desc"
-        file_dir = "..\\QuarterlyAnnualData\\"
+        file_dir = "QuarterlyAnnualData\\"
 
         temp_name = "Metrics" if SheetType.METRICS == type else type.split('%')[0] + type.split('0')[1]
         file_path = file_dir + "\\" + stock_symbol + temp_name + frequency[2] + ".xlsx"
-        if os.path.exists(file_path):
-            os.remove(file_path)
 
         wget.download(download_url, file_path)
 
@@ -41,11 +39,8 @@ class StockRowData:
         sheet = x_file[stock_symbol]
         sheet.cell(row=1, column=1).value = "DATE"
         x_file.save(file_path)
+        x_file.close()
 
-        balance_sheet_data = pd.read_excel(file_path, header=0, index_col=False, keep_default_na=True).T
-        print(balance_sheet_data.head())
+        balance_sheet_data = pd.read_excel(file_path, header=None, index_col=False, keep_default_na=True).T
+        os.remove(file_path)
         return balance_sheet_data
-
-#Example Usage
-instance = StockRowData()
-instance.get_file("GOOGL", SheetType.METRICS, Frequency.QUARTERLY)
