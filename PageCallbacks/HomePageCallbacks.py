@@ -9,8 +9,9 @@ def register_homepage_callbacks(app, init_stock):
     @app.callback([Output('table', 'figure'),
                    Output('symbol', 'children')],
                   [Input('submit-button', 'n_clicks')],
-                  [State('drop_down_symbols', 'value')])
-    def plot_daily_high(n_clicks, input_symbols):
+                  [State('drop_down_symbols', 'value'),
+                   State('radio-items', 'value')])
+    def plot_daily_high(n_clicks, input_symbols, candle_val):
 
         if input_symbols is not None:
             trace = []
@@ -18,9 +19,28 @@ def register_homepage_callbacks(app, init_stock):
                 stock_data = Stocks.getdata(symbol)
                 stock_data.to_csv('CSVFiles/test.csv')
                 stock_data_out = pd.read_csv("CSVFiles/test.csv")
-                trace.append(go.Scatter(x=stock_data_out['Date'], y=stock_data_out['High'], name=symbol, mode='lines'))
-            my_string = ', '.join(map(str, input_symbols))
-            return {"data": trace}, my_string
+                my_string = ', '.join(map(str, input_symbols))
+                if candle_val == 'C':
+                    trace.append(
+                        go.Candlestick(x=stock_data_out['Date'], open=stock_data_out['Open'],
+                                       high=stock_data_out['High'],
+                                       low=stock_data_out['Low'], close=stock_data_out['Close'], name=symbol,
+                                       increasing={'line': {'color': '#00CC94'}},
+                                       decreasing={'line': {'color': '#F50030'}}))
+                else:
+                    trace.append(
+                        go.Scatter(x=stock_data_out['Date'], y=stock_data_out['High'], name=symbol, mode='lines'))
+            if candle_val == 'C':
+                return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
+                                                           xaxis={'rangeslider': {'visible': False},
+                                                                  'autorange': True, },
+                                                           ## if rangeslider is True then cannot change y axis range
+                                                           yaxis={"title": f'Stock Price (USD)'})}, my_string
+            else:
+                return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
+                                                           xaxis={'rangeslider': {'visible': False},
+                                                                  'autorange': True, },
+                                                           yaxis={"title": f'Stock Price (USD)'})}, my_string
         else:
             return {
                        'data': [

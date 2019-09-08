@@ -7,6 +7,15 @@ def construct_layout(drop_down_symbols, init_stock):
     return [html.H1(id='symbol', children='AAPL'),
             dcc.Dropdown(id='drop_down_symbols', options=drop_down_symbols, multi=True,
                          className="dcc_control"),
+            dcc.RadioItems(
+                id='radio-items',
+                options=[
+                    {'label': 'Candlesticks', 'value': 'C'},
+                    {'label': 'Stock Price', 'value': 'S'}
+                ],
+                value='S',
+                labelStyle={'display': 'inline-block'}
+            ),
             html.Button(id='submit-button', n_clicks=0, children='Submit'),
             dcc.Graph(id='table', figure={'data': [go.Scatter(x=init_stock['Date'],
                                                               y=init_stock['High'])]})
