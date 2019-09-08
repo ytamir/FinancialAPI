@@ -21,9 +21,15 @@ def construct_layout(drop_down_symbols, init_stock):
         html.Button(id='submit-button', n_clicks=0, children='Submit'),
 
         # This is the layout for our page links, on initial load, everything but the home page is hidden
-        html.Div(id='home-page-content', children=HomePageLayout.construct_layout(init_stock)),
-        html.Div(id='financial-metrics-page-content', children=FinancialMetricsPageLayout.construct_layout(init_stock),
-                 style={'display': 'none'}),
+        dcc.Loading(
+            id="loading_bar",
+            type="circle",
+            children=[html.Div(id='home-page-content', children=HomePageLayout.construct_layout(init_stock)),
+                      html.Div(id='financial-metrics-page-content',
+                               children=FinancialMetricsPageLayout.construct_layout(init_stock),
+                               style={'display': 'none'})]
+        ),
+
 
         # This is a hidden state for our stocks we have currently selected, that I figured might be useful
         html.Div(id='stock_state', style={'display': 'none'})
