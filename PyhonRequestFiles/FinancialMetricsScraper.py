@@ -28,14 +28,14 @@ class StockRowData:
 
         download_url = "https://stockrow.com/api/companies/" + stock_symbol + "/financials.xlsx?dimension=" \
                        + frequency + "&" + "section=" + type + "&sort=desc"
-        file_dir = "QuarterlyAnnualData\\"
+        file_dir = "CSVFiles\\"
 
         temp_name = "Metrics" if SheetType.METRICS == type else type.split('%')[0] + type.split('0')[1]
         file_path = file_dir + "\\" + stock_symbol + temp_name + frequency[2] + ".xlsx"
 
         wget.download(download_url, file_path)
 
-        x_file = openpyxl.load_workbook(file_path)
+        x_file = openpyxl.ldoad_workbook(file_path)
         sheet = x_file[stock_symbol]
         sheet.cell(row=1, column=1).value = "DATE"
         x_file.save(file_path)

@@ -3,7 +3,7 @@ import dash_html_components as html
 from PageLayouts import HomePageLayout, FinancialMetricsPageLayout
 
 
-def construct_layout(drop_down_symbols, init_stock):
+def construct_layout(drop_down_symbols, init_stock, init_revenue):
     return [
         dcc.Location(id='url', refresh=False),
         dcc.Link('Home Page', id="home_page", href='/'),
@@ -13,7 +13,7 @@ def construct_layout(drop_down_symbols, init_stock):
 
         html.H1(id='symbol', children='AAPL'),
         dcc.Dropdown(id='drop_down_symbols', options=drop_down_symbols, multi=True,
-                     className="dcc_control"),
+                     className="dcc_control", value=["AAPL"]),
         dcc.RadioItems(id='radio-items', options=[{'label': 'Candlesticks', 'value': 'C'}, {'label': 'Stock Price',
                                                                                             'value': 'S'}
                                                   ]
@@ -26,7 +26,7 @@ def construct_layout(drop_down_symbols, init_stock):
             type="circle",
             children=[html.Div(id='home-page-content', children=HomePageLayout.construct_layout(init_stock)),
                       html.Div(id='financial-metrics-page-content',
-                               children=FinancialMetricsPageLayout.construct_layout(init_stock),
+                               children=FinancialMetricsPageLayout.construct_layout(init_revenue),
                                style={'display': 'none'})]
         ),
 
