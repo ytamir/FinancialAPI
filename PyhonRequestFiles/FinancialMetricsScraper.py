@@ -35,7 +35,7 @@ class StockRowData:
 
         wget.download(download_url, file_path)
 
-        x_file = openpyxl.ldoad_workbook(file_path)
+        x_file = openpyxl.load_workbook(file_path)
         sheet = x_file[stock_symbol]
         sheet.cell(row=1, column=1).value = "DATE"
         x_file.save(file_path)
