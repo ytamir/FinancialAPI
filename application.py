@@ -5,9 +5,6 @@ import pandas as pd
 from PageLayouts import Layouts
 from PageCallbacks import Callbacks
 
-init_stock = pd.read_csv("CSVFiles/AAPLPrice.csv")
-init_revenue = pd.read_excel("CSVFiles/AAPLIncomeStatementY.xlsx", header=None, index_col=False,
-                             keep_default_na=True).T
 nasdaq = pd.read_csv("CSVFiles/nasdaq.csv")
 nyse = pd.read_csv("CSVFiles/nyse.csv")
 symbols = nyse.Symbol.values.tolist() + nasdaq.Symbol.values.tolist()
@@ -18,9 +15,9 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 application = app.server
 
 # Setup the App Layout
-app.layout = html.Div(children=Layouts.construct_layout(drop_down_symbols, init_stock, init_revenue))
+app.layout = html.Div(children=Layouts.construct_layout(drop_down_symbols))
 # Register Callbacks
-Callbacks.register_callbacks(app, init_stock, init_revenue)
+Callbacks.register_callbacks(app)
 
 if __name__ == '__main__':
     application.run(debug=True, port=8080)

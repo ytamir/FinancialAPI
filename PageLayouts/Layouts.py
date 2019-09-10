@@ -3,7 +3,7 @@ import dash_html_components as html
 from PageLayouts import HomePageLayout, FinancialMetricsPageLayout
 
 
-def construct_layout(drop_down_symbols, init_stock, init_revenue):
+def construct_layout(drop_down_symbols):
     return [
         dcc.Location(id='url', refresh=False),
         dcc.Link('Home Page', id="home_page", href='/'),
@@ -19,9 +19,9 @@ def construct_layout(drop_down_symbols, init_stock, init_revenue):
         dcc.Loading(
             id="loading_bar",
             type="circle",
-            children=[html.Div(id='home-page-content', children=HomePageLayout.construct_layout(init_stock)),
+            children=[html.Div(id='home-page-content', children=HomePageLayout.construct_layout()),
                       html.Div(id='financial-metrics-page-content',
-                               children=FinancialMetricsPageLayout.construct_layout(init_revenue),
+                               children=FinancialMetricsPageLayout.construct_layout(),
                                style={'display': 'none'})]
         ),
 

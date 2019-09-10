@@ -4,7 +4,7 @@ from PyhonRequestFiles.stock import Stocks
 from dash.dependencies import Input, Output, State
 
 
-def register_callbacks(app, init_stock):
+def register_callbacks(app):
 
     @app.callback([Output('homepage-table', 'figure'),
                    Output('symbol', 'children')],
@@ -12,8 +12,8 @@ def register_callbacks(app, init_stock):
                    Input('radio-items', 'value')])
     def plot_daily_high(input_symbols, candle_val):
         my_string = ''
+        trace = []
         if input_symbols is not None:
-            trace = []
             for symbol in input_symbols:
                 stock_data = Stocks.getdata(symbol)
                 stock_data.to_csv('CSVFiles/test.csv')
@@ -41,8 +41,4 @@ def register_callbacks(app, init_stock):
                                                                   'autorange': True, },
                                                            yaxis={"title": f'Stock Price (USD)'})}, my_string
         else:
-            return {
-                       'data': [
-                           go.Scatter(x=init_stock['Date'], y=init_stock['High'])
-                       ]
-                   }, "AAPL"
+            return {'data': trace}, ""
