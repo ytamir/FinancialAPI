@@ -18,6 +18,7 @@ def register_callbacks(app, metrics_dict):
                                                                                FinancialMetricsScraper.SheetType.
                                                                                INCOME_STATEMENT,
                                                                                FinancialMetricsScraper.Frequency.QUARTERLY)
-                    trace.append(go.Scatter(x=stock_data.iloc[:, 0], y=stock_data.iloc[:, c], name=metrics_dict[str(c)],
+
+                    trace.append(go.Scatter(x=stock_data.iloc[:, 0], y=stock_data.iloc[:, c], name=symbol + ": " + metrics_dict[str(c)],
                                             mode='lines'))
         return {"data": trace}
