@@ -5,9 +5,8 @@ from dash.dependencies import Input, Output, State
 
 def register_callbacks(app, init_revenue):
     @app.callback(Output('financial-metrics-table', 'figure'),
-                  [Input('submit-button', 'n_clicks')],
-                  [State('drop_down_symbols', 'value')])
-    def plot_revenue(n_clicks, input_symbols):
+                  [Input('drop_down_symbols', 'value')])
+    def plot_revenue(input_symbols):
         if input_symbols is not None:
             trace = []
             for symbol in input_symbols:

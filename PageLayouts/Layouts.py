@@ -14,11 +14,6 @@ def construct_layout(drop_down_symbols, init_stock, init_revenue):
         html.H1(id='symbol', children='AAPL'),
         dcc.Dropdown(id='drop_down_symbols', options=drop_down_symbols, multi=True,
                      className="dcc_control", value=["AAPL"]),
-        dcc.RadioItems(id='radio-items', options=[{'label': 'Candlesticks', 'value': 'C'}, {'label': 'Stock Price',
-                                                                                            'value': 'S'}
-                                                  ]
-                       ),
-        html.Button(id='submit-button', n_clicks=0, children='Submit'),
 
         # This is the layout for our page links, on initial load, everything but the home page is hidden
         dcc.Loading(

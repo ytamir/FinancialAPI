@@ -8,10 +8,9 @@ def register_callbacks(app, init_stock):
 
     @app.callback([Output('homepage-table', 'figure'),
                    Output('symbol', 'children')],
-                  [Input('submit-button', 'n_clicks')],
-                  [State('drop_down_symbols', 'value'),
-                   State('radio-items', 'value')])
-    def plot_daily_high(n_clicks, input_symbols, candle_val):
+                  [Input('drop_down_symbols', 'value'),
+                   Input('radio-items', 'value')])
+    def plot_daily_high(input_symbols, candle_val):
         my_string = ''
         if input_symbols is not None:
             trace = []
