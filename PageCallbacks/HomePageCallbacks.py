@@ -7,9 +7,9 @@ from dash.dependencies import Input, Output, State
 def register_callbacks(app):
 
     @app.callback([Output('homepage-table', 'figure'),
-                   Output('symbol', 'children')],
-                  [Input('drop_down_symbols', 'value'),
-                   Input('radio-items', 'value')])
+                   Output('home_symbol', 'children')],
+                  [Input('home_drop_down_symbols', 'value'),
+                   Input('home_radio-items', 'value')])
     def plot_daily_high(input_symbols, candle_val):
         my_string = ''
         trace = []
