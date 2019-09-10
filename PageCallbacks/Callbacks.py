@@ -2,7 +2,7 @@ import dash
 from PageCallbacks import HomePageCallbacks, FinancialMetricsCallbacks
 
 
-def register_callbacks(app):
+def register_callbacks(app, metrics_dict):
 
     # Callbacks for App Control
     @app.callback([dash.dependencies.Output('home-page-content', 'style'),
@@ -17,4 +17,4 @@ def register_callbacks(app):
             return {}, {'display': 'none'}, input_symbols
 
     HomePageCallbacks.register_callbacks(app)
-    FinancialMetricsCallbacks.register_callbacks(app)
+    FinancialMetricsCallbacks.register_callbacks(app, metrics_dict)
