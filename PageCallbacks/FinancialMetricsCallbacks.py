@@ -1,6 +1,6 @@
 import plotly.graph_objs as go
 from PyhonRequestFiles import FinancialMetricsScraper
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
 
 # TODO transform metrics dropdown to candlestick with selected values

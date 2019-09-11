@@ -1,24 +1,21 @@
 import pandas as pd
 import plotly.graph_objs as go
 from PyhonRequestFiles.stock import Stocks
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
 
 def register_callbacks(app):
 
-    @app.callback([Output('homepage-table', 'figure'),
-                   Output('home_symbol', 'children')],
-                  [Input('home_drop_down_symbols', 'value'),
-                   Input('home_radio-items', 'value')])
+    @app.callback(Output('homepage-table', 'figure'),
+                  [Input('drop_down_symbols', 'value'),
+                  Input('home_radio-items', 'value')])
     def plot_daily_high(input_symbols, candle_val):
-        my_string = ''
         trace = []
         if input_symbols is not None:
             for symbol in input_symbols:
                 stock_data = Stocks.getdata(symbol)
                 stock_data.to_csv('CSVFiles/test.csv')
                 stock_data_out = pd.read_csv("CSVFiles/test.csv")
-                my_string = ', '.join(map(str, input_symbols))
                 if candle_val == 'C':
                     trace.append(
                         go.Candlestick(x=stock_data_out['Date'], open=stock_data_out['Open'],
@@ -34,11 +31,11 @@ def register_callbacks(app):
                                                            xaxis={'rangeslider': {'visible': False},
                                                                   'autorange': True, },
                                                            # if rangeslider is True then cannot change y axis range
-                                                           yaxis={"title": f'Stock Price (USD)'})}, my_string
+                                                           yaxis={"title": f'Stock Price (USD)'})}
             else:
                 return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
                                                            xaxis={'rangeslider': {'visible': False},
                                                                   'autorange': True, },
-                                                           yaxis={"title": f'Stock Price (USD)'})}, my_string
+                                                           yaxis={"title": f'Stock Price (USD)'})}
         else:
-            return {'data': trace}, ""
+            return {'data': trace}
