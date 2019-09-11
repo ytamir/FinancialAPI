@@ -10,4 +10,9 @@ def construct_layout(drop_down_symbols):
             dcc.RadioItems(id='home_radio-items',
                            options=[{'label': 'Candlesticks', 'value': 'C'}, {'label': 'Stock Price',
                                                                               'value': 'S'}]),
-            dcc.Graph(id='homepage-table', figure={'data': [go.Scatter(x=[], y=[])]})]
+            dcc.Loading(
+                id="homepage-loading-bar",
+                type="circle",
+                children=[dcc.Graph(id='homepage-table', figure={'data': [go.Scatter(x=[], y=[])]})])
+            ]
+
