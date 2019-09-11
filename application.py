@@ -2,6 +2,7 @@ import dash
 import dash_html_components as html
 import pandas as pd
 
+from ConfigFiles import Config
 from PageLayouts import Layouts
 from PageCallbacks import Callbacks
 
@@ -14,12 +15,13 @@ metrics = pd.read_csv("CSVFiles/metrics.csv")
 symbols = nyse.Symbol.values.tolist() + nasdaq.Symbol.values.tolist()
 drop_down_symbols = [{'label': str(a), 'value': str(a)} for a in symbols]
 
-# Setup Quarterly Page
-metrics_dict = {"0": "Date"}
+# Setup Financial Metrics Page
+count = 0
+metrics_dict = {str(count): "Date"}
 drop_down_metrics_list = []
-for count, col in enumerate(metrics.columns, start=1):
-    drop_down_metrics_list.append({'label': str(col), 'value': count})
-    metrics_dict[str(count)] = str(col)
+for metric in Config.income_statement_metrics:
+    drop_down_metrics_list.append({'label': metric, 'value': count})
+    metrics_dict[str(count)] = metric
     count += 1
 
 # Setup site

@@ -28,10 +28,9 @@ class StockRowData:
 
         download_url = "https://stockrow.com/api/companies/" + stock_symbol + "/financials.xlsx?dimension=" \
                        + frequency + "&" + "section=" + type + "&sort=desc"
-        file_dir = "CSVFiles\\"
 
         temp_name = "Metrics" if SheetType.METRICS == type else type.split('%')[0] + type.split('0')[1]
-        file_path = file_dir + "\\" + stock_symbol + temp_name + frequency[2] + ".xlsx"
+        file_path = stock_symbol + temp_name + frequency[2] + ".xlsx"
 
         wget.download(download_url, file_path)
 
@@ -41,6 +40,6 @@ class StockRowData:
         x_file.save(file_path)
         x_file.close()
 
-        balance_sheet_data = pd.read_excel(file_path, header=None, index_col=False, keep_default_na=True).T
+        data = pd.read_excel(file_path, header=None, index_col=False, keep_default_na=True).T
         os.remove(file_path)
-        return balance_sheet_data
+        return data
