@@ -3,7 +3,7 @@ import dash_html_components as html
 from PageLayouts import HomePageLayout, FinancialMetricsPageLayout
 
 
-def construct_layout(drop_down_symbols, drop_down_metrics_list):
+def construct_layout(drop_down_symbols, drop_down_income_statement_list):
     return [
         dcc.Location(id='url', refresh=False),
         html.H1(id='symbol', children='AAPL'),
@@ -15,7 +15,7 @@ def construct_layout(drop_down_symbols, drop_down_metrics_list):
             dcc.Tab(label='Price Analysis', value='tab-1-example',
                     children=HomePageLayout.construct_layout(drop_down_symbols)),
             dcc.Tab(label='Financial Metrics', value='tab-2-example',
-                    children=FinancialMetricsPageLayout.construct_layout(drop_down_symbols, drop_down_metrics_list))
+                    children=FinancialMetricsPageLayout.construct_layout(drop_down_income_statement_list))
         ]),
         # This is a hidden state for our stocks we have currently selected, that I figured might be useful
         html.Div(id='stock_state', style={'display': 'none'})
