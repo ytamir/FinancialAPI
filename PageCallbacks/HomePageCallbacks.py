@@ -5,15 +5,15 @@ from dash.dependencies import Input, Output
 
 
 def register_callbacks(app):
-
     @app.callback(Output('homepage-table', 'figure'),
                   [Input('drop_down_symbols', 'value'),
-                  Input('home_radio-items', 'value')])
-    def plot_daily_high(input_symbols, candle_val):
+                   Input('home_radio-items', 'value'),
+                   Input('time_radio-items', 'value')])
+    def plot_daily_high(input_symbols, candle_val, time_val):
         trace = []
         if input_symbols is not None:
             for symbol in input_symbols:
-                stock_data = Stocks.getdatadaily(symbol)
+                stock_data = Stocks.getdatadaily(symbol, time_val)
                 if candle_val == 'C':
                     trace.append(
                         go.Candlestick(x=stock_data['Date'], open=stock_data['Open'],

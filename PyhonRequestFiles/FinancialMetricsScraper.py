@@ -28,7 +28,7 @@ class StockRowData:
 
         download_url = "https://stockrow.com/api/companies/" + stock_symbol + "/financials.xlsx?dimension=" \
                        + frequency + "&" + "section=" + type + "&sort=desc"
-        print(download_url)
+        # print(download_url)
         temp_name = "Metrics" if SheetType.METRICS == type else type.split('%')[0] + type.split('0')[1]
         file_path = stock_symbol + temp_name + frequency[2] + ".xlsx"
 
