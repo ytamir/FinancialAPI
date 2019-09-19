@@ -35,23 +35,25 @@ class Stocks:
             return df
 
         except:
-            return pd.read_csv('CSVFiles/aapl.csv')
+            return pd.read_csv('CSVFiles/aapl.csv').reset_index(inplace=True)
 
     def getdatadaily(symbol):
         key = getapikey()
-        ts = TimeSeries(key, output_format='pandas', indexing_type='date')
-        # data, meta_data = ts.get_intraday(symbol='MSFT',interval='1min', outputsize='full')
-        data, meta_data = ts.get_daily(symbol=symbol, outputsize='full')
-        data.reset_index(inplace=True)
-        data.rename(columns={'date': 'Date',
-                             '1. open': 'Open',
-                             '2. high': 'High',
-                             '3. low': 'Low',
-                             '4. close': 'Close',
-                             '5. volume': 'Volume'},
-                    inplace=True)
-        return data
-        #  df = df.T.reset_index(drop=True).T
+        try:
+            ts = TimeSeries(key, output_format='pandas', indexing_type='date')
+            # data, meta_data = ts.get_intraday(symbol='MSFT',interval='1min', outputsize='full')
+            data, meta_data = ts.get_daily(symbol=symbol, outputsize='full')
+            data.reset_index(inplace=True)
+            data.rename(columns={'date': 'Date',
+                                 '1. open': 'Open',
+                                 '2. high': 'High',
+                                 '3. low': 'Low',
+                                 '4. close': 'Close',
+                                 '5. volume': 'Volume'},
+                        inplace=True)
+            return data
+        except:
+            return Stocks.getdata(symbol)
 
     def printdata(symbol):
         style.use('ggplot')
@@ -60,5 +62,3 @@ class Stocks:
         end = dt.datetime.now()
         df = web.DataReader("DOX", 'yahoo', start, end)
         return df
-
-
