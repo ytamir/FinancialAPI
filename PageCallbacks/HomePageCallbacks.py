@@ -14,18 +14,16 @@ def register_callbacks(app):
         if input_symbols is not None:
             for symbol in input_symbols:
                 stock_data = Stocks.getdatadaily(symbol)
-                stock_data.to_csv('CSVFiles/test.csv')
-                stock_data_out = pd.read_csv("CSVFiles/test.csv")
                 if candle_val == 'C':
                     trace.append(
-                        go.Candlestick(x=stock_data_out['date'], open=stock_data_out['Open'],
-                                       high=stock_data_out['High'],
-                                       low=stock_data_out['Low'], close=stock_data_out['Close'], name=symbol,
+                        go.Candlestick(x=stock_data['Date'], open=stock_data['Open'],
+                                       high=stock_data['High'],
+                                       low=stock_data['Low'], close=stock_data['Close'], name=symbol,
                                        increasing={'line': {'color': '#00CC94'}},
                                        decreasing={'line': {'color': '#F50030'}}))
                 else:
                     trace.append(
-                        go.Scatter(x=stock_data_out['date'], y=stock_data_out['High'], name=symbol, mode='lines'))
+                        go.Scatter(x=stock_data['Date'], y=stock_data['High'], name=symbol, mode='lines'))
             if candle_val == 'C':
                 return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
                                                            xaxis={'rangeslider': {'visible': False},

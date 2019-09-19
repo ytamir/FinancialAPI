@@ -12,8 +12,6 @@ def getapikey():
     with open('CSVFiles/apikey.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
         for row in readCSV:
-            print('row')
-            print(row)
             return row[0]
 
 
@@ -33,12 +31,8 @@ class Stocks:
         end = dt.datetime.now()
         try:
             df = web.DataReader(symbol, 'yahoo', start, end)
-            print(df.head())
-            stock_data = df
-            stock_data.to_csv('test.csv')
-            stock_data_out = pd.read_csv("test.csv")
-            print(stock_data_out['Date'].head())
-            # return df
+            df.reset_index(inplace=True)
+            return df
 
         except:
             return pd.read_csv('CSVFiles/aapl.csv')
@@ -48,6 +42,7 @@ class Stocks:
         ts = TimeSeries(key, output_format='pandas', indexing_type='date')
         # data, meta_data = ts.get_intraday(symbol='MSFT',interval='1min', outputsize='full')
         data, meta_data = ts.get_daily(symbol=symbol, outputsize='full')
+        data.reset_index(inplace=True)
         data.rename(columns={'date': 'Date',
                              '1. open': 'Open',
                              '2. high': 'High',
@@ -64,7 +59,6 @@ class Stocks:
         start = dt.datetime(2009, 1, 1)
         end = dt.datetime.now()
         df = web.DataReader("DOX", 'yahoo', start, end)
-        print(df)
         return df
 
 
