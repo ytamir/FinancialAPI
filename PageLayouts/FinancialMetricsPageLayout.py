@@ -4,11 +4,11 @@ import dash_html_components as html
 from ConfigFiles import MetricsConfig
 
 
-def construct_layout(drop_down_income_statement_list):
+def construct_layout():
     metrics = [{'label': str(value), 'value': str(value)} for value in MetricsConfig.main_dictionary["all_metrics"]]
     return [html.Br(),
             dcc.Dropdown(id='drop_down_metrics',
-                         options= metrics,
+                         options=metrics,
                          multi=True,
                          value=['TOTAL DEBT'],
                          className="dcc_control"),
@@ -16,8 +16,8 @@ def construct_layout(drop_down_income_statement_list):
 
             dcc.RadioItems(id="length_radio",
                            options=[
-                               {'label': 'Quarterly', 'value': 'MRQ'},
-                               {'label': 'Annually', 'value': 'MRY'}
+                               {'label': 'Quarterly', 'value': 0},
+                               {'label': 'Annually', 'value': 1}
                            ],
                            value='MRQ',
                            labelStyle={'display': 'inline-block'}
