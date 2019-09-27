@@ -1,3 +1,4 @@
+requests
 alpha-vantage==2.1.1
 dash==1.1.1
 dash-core-components==1.1.1
