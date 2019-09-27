@@ -19,7 +19,7 @@ def construct_layout():
                                {'label': 'Quarterly', 'value': 0},
                                {'label': 'Annually', 'value': 1}
                            ],
-                           value='MRQ',
+                           value=0,
                            labelStyle={'display': 'inline-block'}
                            ),
             dcc.Loading(

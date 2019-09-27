@@ -39,6 +39,7 @@ def build_url(quarterly_annual, metrics, stocks):
                 else:
                     url = url[:-1]
                     url += "?period="
+
                     if quarterly_annual == MetricsConfig.Frequencies.QUARTERLY:
                         url += "quarter"
                     elif quarterly_annual == MetricsConfig.Frequencies.ANNUAL:
@@ -52,7 +53,6 @@ def build_url(quarterly_annual, metrics, stocks):
                 found = True
                 index_found = index
                 break
-
         if not found:
             return_arr.append({'url': url, 'metrics': [metric]})
         else:

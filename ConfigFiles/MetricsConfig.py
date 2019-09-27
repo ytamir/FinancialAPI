@@ -1,15 +1,9 @@
 from enum import Enum
 
 
-class Frequencies(Enum):
+class Frequencies:
     QUARTERLY = 0
     ANNUAL = 1
-
-
-class RequestType(Enum):
-    FINANCIAL_RATIOS = 0
-    ALL_OTHER = 1
-
 
 main_dictionary = { 
     "balance-sheet-metrics": [
