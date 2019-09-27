@@ -11,7 +11,6 @@ def register_callbacks(app):
                    ])
     def plot_revenue(stocks, metrics, quarterly_annual):
         trace = []
-        print(stocks)
         stock_data = FinancialStatementsJSONParser.fetch_data(quarterly_annual, metrics, stocks)
         for data in stock_data:
             trace.append(go.Scatter(x=data["DATES"], y=data["DATA"], name=data["SYMBOL"]))
