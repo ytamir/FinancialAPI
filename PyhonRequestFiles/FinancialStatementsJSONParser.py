@@ -1,5 +1,9 @@
 from ConfigFiles import MetricsConfig
 import requests
+import sys
+
+sys.stdout = sys.__stdout__
+sys.stderr = sys.__stderr__
 
 
 def build_url(quarterly_annual, metrics, stocks):
