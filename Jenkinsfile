@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    environment {
-        PYTHONPATH='$PYTHONPATH:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
-    }
     stages {
         stage('Build') {
             steps {
@@ -19,6 +16,9 @@ pipeline {
             }
         }
         stage('Deploy') {
+            environment {
+                PYTHONPATH='${PYTHONPATH}:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
+            }
             steps {
                 echo 'Deploying....'
                 sh 'python application.py'
