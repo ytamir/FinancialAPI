@@ -15,7 +15,7 @@ pipeline {
         }
         stage('Deploy') {
             environment {
-                PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master'
+                env.PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master'
 
             }
             steps {
