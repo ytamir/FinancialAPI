@@ -6,8 +6,6 @@ from PageLayouts import HomePageLayout, FinancialMetricsPageLayout
 def construct_layout(drop_down_symbols):
     return [
         dcc.Location(id='url', refresh=False),
-        html.H1(id='symbol', children='AAPL'),
-        html.Br(),
         dcc.Dropdown(id='drop_down_symbols', options=drop_down_symbols, multi=True,
                      className="dcc_control", value=["AAPL"]),
         html.Br(),
