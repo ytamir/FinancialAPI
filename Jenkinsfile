@@ -6,7 +6,7 @@ pipeline {
             steps {
                 echo 'Building..'
                 checkout scm
-                sh 'pip install -r requirements.txt'
+                sh 'sudo pip install -r requirements.txt'
             }
         }
         stage('Test') {
