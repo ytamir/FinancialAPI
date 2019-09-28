@@ -1,10 +1,14 @@
 pipeline {
     agent any
-
+    environment {
+        PYTHONPATH=$PYTHONPATH:'ConfigFiles':'PageCallbacks':'PageLayouts':'PageStyles':'PyhonRequestFiles'
+    }
     stages {
         stage('Build') {
             steps {
                 echo 'Building..'
+
+                echo "Database engine is ${PYTHONPATH}"
                 checkout scm
                 sh 'pip install -r requirements.txt'
             }
