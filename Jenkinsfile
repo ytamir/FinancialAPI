@@ -4,8 +4,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-
-                echo "Database engine is ${PYTHONPATH}"
                 checkout scm
                 sh 'pip install -r requirements.txt'
             }
@@ -17,7 +15,8 @@ pipeline {
         }
         stage('Deploy') {
             environment {
-                PYTHONPATH='${PYTHONPATH}:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
+                sh 'export PYTHONPATH = $PYTHONPATH:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
+                echo "Database engine is ${PYTHONPATH}"
             }
             steps {
                 echo 'Deploying....'
