@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        PYTHONPATH=$PYTHONPATH:'ConfigFiles':'PageCallbacks':'PageLayouts':'PageStyles':'PyhonRequestFiles'
+        PYTHONPATH='$PYTHONPATH:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
     }
     stages {
         stage('Build') {
