@@ -15,8 +15,7 @@ pipeline {
         }
         stage('Deploy') {
             environment {
-                export PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master/PageLayouts'
-
+                PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master/PageLayouts'
             }
             steps {
                 echo "Database engine is ${PYTHONPATH}"
