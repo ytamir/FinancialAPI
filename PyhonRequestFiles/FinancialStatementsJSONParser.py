@@ -131,8 +131,12 @@ def fetch_data(quarterly_annual, metrics, stocks):
     :param stocks: Which stocks we want to fetch
     :return: List of the Form [{ "SYMBOL": "AAPL", "METRIC": "Revenue", "DATES": [], "DATA": []}, {}, {}, ...]
     """
-    urls_dict = build_url(quarterly_annual, metrics, stocks)
-    return parse_json(stocks, urls_dict)
+
+    if len(stocks) == 0 or len(metrics) == 0:
+        return []
+    else:
+        urls_dict = build_url(quarterly_annual, metrics, stocks)
+        return parse_json(stocks, urls_dict)
 
 
 # symbols = ["AAPL", "GRMN", "CERN"]
