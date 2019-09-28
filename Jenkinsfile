@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                python application.py
+                checkout scm
             }
         }
         stage('Test') {
@@ -16,8 +16,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
-                curl -i http://127.0.0.1:8080/
-                echo $'\cc' | application.py
             }
         }
     }
