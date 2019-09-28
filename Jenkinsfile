@@ -15,7 +15,7 @@ pipeline {
         }
         stage('Deploy') {
             environment {
-                PYTHONPATH = '{$PYTHONPATH}:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
+                PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master'
 
             }
             steps {
