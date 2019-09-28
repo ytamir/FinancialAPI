@@ -15,10 +15,11 @@ pipeline {
         }
         stage('Deploy') {
             environment {
-                sh 'export PYTHONPATH = $PYTHONPATH:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
-                echo "Database engine is ${PYTHONPATH}"
+                PYTHONPATH = '{$PYTHONPATH}:ConfigFiles:PageCallbacks:PageLayouts:PageStyles:PyhonRequestFiles'
+
             }
             steps {
+                echo "Database engine is ${PYTHONPATH}"
                 echo 'Deploying....'
                 sh 'python application.py'
                 sh 'curl http://127.0.0.1:8080/'
