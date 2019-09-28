@@ -18,7 +18,7 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 sh 'python application.py'
-                sh 'curl http://127.0.0.1:8080/' > result
+                sh 'curl http://127.0.0.1:8080/ > result'
                 def output = readFile('result').trim()
                 echo "output=$output";
             }
