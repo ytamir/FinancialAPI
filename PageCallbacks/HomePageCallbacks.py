@@ -25,7 +25,7 @@ def register_callbacks(app):
                     trace.append(
                         go.Scatter(x=stock_data['Date'], y=stock_data['High'], name=symbol, mode='lines'))
             if candle_val == 'C':
-                return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
+                return {"data": trace, 'layout': go.Layout(title="Stock Values",
                                                            xaxis={'rangeslider': {'visible': False},
                                                                   'autorange': True, },
                                                            # if rangeslider is True then cannot change y axis range
