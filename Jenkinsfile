@@ -19,8 +19,8 @@ pipeline {
             }
             steps {
                 echo 'Deploying....'
-                sh 'python application.py'
-                sh 'curl http://127.0.0.1:8080/'
+                sh 'python application.py &'
+                sh 'curl --verbose http://127.0.0.1:1025/'
             }
         }
     }
