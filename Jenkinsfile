@@ -1,10 +1,10 @@
 pipeline {
     agent any
     stages {
-        environment {
-            PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master/:/usr/lib/python2.7/site-packages/'
-        }
         stage('Build') {
+            environment {
+                PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master/:/usr/lib/python2.7/site-packages/'
+            }
             steps {
                 echo 'Building..'
                 checkout scm
