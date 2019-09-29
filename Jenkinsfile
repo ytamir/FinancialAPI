@@ -1,11 +1,15 @@
 pipeline {
     agent any
     stages {
+        environment {
+            PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master/:/usr/lib/python2.7/site-packages/'
+        }
         stage('Build') {
             steps {
                 echo 'Building..'
                 checkout scm
                 sh 'pip install -r requirements.txt --user'
+                sh 'python application.py &'
             }
         }
         stage('Test') {
@@ -13,13 +17,11 @@ pipeline {
                 echo 'Testing..'
             }
         }
-        stage('Deploy') {
-            environment {
-                PYTHONPATH = '/var/lib/jenkins/workspace/FinancialAnalysis_master/:/usr/lib/python2.7/site-packages/'
-            }
+        stage('Run') {
+
             steps {
-                echo 'Deploying....'
-                sh 'python application.py &'
+                echo 'Running....'
+                sleep 10
                 sh 'curl --verbose http://127.0.0.1:1025/'
             }
         }
