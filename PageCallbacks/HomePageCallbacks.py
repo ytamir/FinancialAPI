@@ -31,7 +31,7 @@ def register_callbacks(app):
                                                            # if rangeslider is True then cannot change y axis range
                                                            yaxis={"title": 'Stock Price (USD)'})}
             else:
-                return {"data": trace, 'layout': go.Layout(title=f"Stock Values",
+                return {"data": trace, 'layout': go.Layout(title="Stock Values",
                                                            xaxis={'rangeslider': {'visible': False},
                                                                   'autorange': True, },
                                                            yaxis={"title": 'Stock Price (USD)'})}
