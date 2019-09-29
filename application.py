@@ -23,4 +23,4 @@ app.layout = html.Div(children=Layouts.construct_layout(drop_down_symbols))
 Callbacks.register_callbacks(app)
 
 if __name__ == '__main__':
-    application.run(debug=True, port=8080)
+    application.run(debug=True, port=80)
