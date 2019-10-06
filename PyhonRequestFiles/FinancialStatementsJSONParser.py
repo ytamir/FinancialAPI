@@ -6,13 +6,15 @@ sys.stdout = sys.__stdout__
 sys.stderr = sys.__stderr__
 
 
-def build_url(quarterly_annual, metrics, stocks):
+def build_url(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric):
     """
     This function takes in a frequency, metrics, and symbols and returns a list of dictionaries
     :param quarterly_annual: Quarterly or Annual
     :param metrics: List of metrics specified in the MetricsConfig.py file
     :param stocks: Stock symbols
-    :return: Returns a dictionary of the urls needed and there associated metrics {'url' : url, 'metrics': [] }
+    :param symbols_to_ignore_for_metric: Which symbols we do not need to pass to the url for a specified metric
+    :return: Returns a dictionary of the urls needed and there associated metrics {'url' : url, 'metrics': [],
+             'size_filtered_symbols': [] }
     """
 
     return_arr = []
@@ -27,9 +29,13 @@ def build_url(quarterly_annual, metrics, stocks):
                 # Get url from dictionary
                 url += MetricsConfig.main_dictionary[key + '-url']
 
-                # Append all symbols to the URL
+                # Append symbols we need
+                size_filtered_symbols = 0
                 for symbol in stocks:
-                    url += symbol + ","
+                    # Do not append symbols that we can ignore for the specified metric
+                    if not metric + "-" + symbol in symbols_to_ignore_for_metric:
+                        url += symbol + ","
+                        size_filtered_symbols += 1
 
                 # Don't add frequency if it is a ratio since this request does not support it
                 if key == "ratio-metrics":
@@ -54,19 +60,19 @@ def build_url(quarterly_annual, metrics, stocks):
                 index_found = index
                 break
         if not found:
-            return_arr.append({'url': url, 'metrics': [metric]})
+            return_arr.append({'url': url, 'metrics': [metric], 'size_filtered_symbols': size_filtered_symbols})
         else:
             return_arr[index_found]['metrics'].append(metric)
 
     return return_arr
 
 
-def parse_json(stocks, urls_dict):
+def parse_json(urls_dict):
     """
     Returns list of data
-    :param stocks: Which stocks we want to fetch
-    :param urls_dict: Dict of api urls to hit and metrics associated with those urls
-    :return: List of the Form [{ "SYMBOL": "AAPL", "METRIC": "Revenue", "DATES": [], "DATA": []}, {}, {}, ...]
+    :param urls_dict: Dict of api urls to hit and metrics associated with those urls along with how many symbols we have
+    :return: List of the Form [{ "SYMBOL": "AAPL", "METRIC": "Revenue", "QUARTERLY_ANNUAL: "QUARTERLY",
+     "DATES": [], "DATA": []}, {}, {}, ...]
     """
     # Returning array of dictionaries of form [{SYMBOL: "", METRIC: "", DATES: [], DATA: []}, SYMBOL2: "", METRIC: "",
     # DATES: [], DATA: [] } ]
@@ -82,8 +88,8 @@ def parse_json(stocks, urls_dict):
             # First convert symbols and there metrics to an array of the form [{}, {}, {}, {}]
             # Loop through each symbol which will be of the format
             # [{}, {}, {}, {}] - This will give us each inner json
-            for symbols_list in json_dictionary.get(list(json_dictionary)[0]) if len(stocks) > 1 else \
-                    [] + [json_dictionary]:
+            for symbols_list in json_dictionary.get(list(json_dictionary)[0]) if item["size_filtered_symbols"] > 1\
+                    else [] + [json_dictionary]:
                 # One dictionary per symbol
                 return_dict = {}
 
@@ -123,20 +129,21 @@ def parse_json(stocks, urls_dict):
     return return_arr
 
 
-def fetch_data(quarterly_annual, metrics, stocks):
+def fetch_data(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric):
     """
     Returns formatted json based on data requested
     :param quarterly_annual: Whether we want quarterly or annual data
     :param metrics: What metrics we want to fetch
     :param stocks: Which stocks we want to fetch
+    :param symbols_to_ignore_for_metric: Which symbols we do not need to pass to the url for a specified metric
     :return: List of the Form [{ "SYMBOL": "AAPL", "METRIC": "Revenue", "DATES": [], "DATA": []}, {}, {}, ...]
     """
 
     if len(stocks) == 0 or len(metrics) == 0:
         return []
     else:
-        urls_dict = build_url(quarterly_annual, metrics, stocks)
-        return parse_json(stocks, urls_dict)
+        urls_dict = build_url(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric)
+        return parse_json(urls_dict)
 
 
 # symbols = ["AAPL", "GRMN", "CERN"]

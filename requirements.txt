@@ -7,7 +7,9 @@ dash-html-components==1.0.0
 dash-renderer==1.0.0
 dash-table==4.1.0
 Flask==1.1.1
+Flask_Caching==1.7.2
 Flask-Compress==1.4.0
+Flask_Redis==0.4.0
 gunicorn==19.9.0
 numpy==1.15.4
 openpyxl==2.6.2
@@ -24,5 +26,6 @@ six==1.12.0
 sklearn==0.0
 tensorflow==1.14.0
 tensorflow-estimator==1.14.0
+redis==3.3.8
 wget==3.2
 xlrd==1.2.0

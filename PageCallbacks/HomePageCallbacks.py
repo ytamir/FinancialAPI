@@ -1,10 +1,9 @@
-import pandas as pd
 import plotly.graph_objs as go
 from PyhonRequestFiles.stock import Stocks
 from dash.dependencies import Input, Output
 
-
 def register_callbacks(app):
+
     @app.callback(Output('homepage-table', 'figure'),
                   [Input('drop_down_symbols', 'value'),
                    Input('home_radio-items', 'value'),
