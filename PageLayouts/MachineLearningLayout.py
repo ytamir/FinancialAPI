@@ -7,8 +7,7 @@ def construct_layout(drop_down_symbols):
     return [html.Br(),
             dcc.Dropdown(id='ml_dropdown',
                          options=drop_down_symbols,
-                         multi=True,
-                         value=['XOM'],
+                         value='XOM',
                          className="dcc_control"),
             html.Br(),
             dcc.Loading(

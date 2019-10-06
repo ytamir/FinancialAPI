@@ -9,9 +9,9 @@ from dash.dependencies import Input, Output
 def register_callbacks(app):
     @app.callback(Output('ml-table', 'figure'),
                   [Input('ml_dropdown', 'value')])
-    def plot_daily_high(input_symbols):
+    def plot_daily_high(input_symbol):
         print('hello')
-        x_axis_seq, data, mid_data = ML.getdata(input_symbols)
+        x_axis_seq, data, mid_data = ML.getdata(input_symbol)
         best_prediction_epoch = 13
         trace = []
         xvals = []

@@ -18,8 +18,8 @@ data_source = 'alphavantage'  # alphavantage or kaggle
 
 
 class ML:
-    def getdata(tickers):
-        ticker = tickers[0]
+    def getdata(ticker):
+       # ticker = tickers[0]
         print("ticker")
         print(ticker)
         if data_source == 'alphavantage':
