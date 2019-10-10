@@ -145,5 +145,4 @@ def register_callbacks(app, cache, cache_timeout, redis_instance):
                     break
             if remove:
                 remove_indices.append(index)
-
         return remove_indices
