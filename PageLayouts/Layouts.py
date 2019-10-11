@@ -1,6 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from PageLayouts import HomePageLayout, FinancialMetricsPageLayout, MachineLearningLayout
+from PageLayouts import StockPriceLayout, FinancialMetricsPageLayout, MachineLearningLayout
 
 
 def construct_layout(drop_down_symbols):
@@ -11,7 +11,7 @@ def construct_layout(drop_down_symbols):
         html.Br(),
         dcc.Tabs(id="tabs-example", value='tab-1-example', children=[
             dcc.Tab(label='Price Analysis', value='tab-1-example',
-                    children=HomePageLayout.construct_layout(drop_down_symbols)),
+                    children=StockPriceLayout.construct_layout()),
             dcc.Tab(label='Financial Metrics', value='tab-2-example',
                     children=FinancialMetricsPageLayout.construct_layout()),
             dcc.Tab(label='Machine Learning', value='tab-3-example',

@@ -1,10 +1,9 @@
-import datetime as dt
-import matplotlib.pyplot as plt
 from matplotlib import style
+from alpha_vantage.timeseries import TimeSeries
+
+import datetime as dt
 import pandas as pd
 import pandas_datareader.data as web
-from alpha_vantage.timeseries import TimeSeries
-from alpha_vantage.techindicators import TechIndicators
 import csv
 
 
@@ -14,33 +13,28 @@ def getapikey():
         for row in readCSV:
             return row
 
-
 class Stocks:
-    def getdata():
+    def get_apple_data():
         style.use('ggplot')
-
-        start = dt.datetime(2009, 1, 1)
+        start = dt.datetime(1980, 1, 1)
         end = dt.datetime.now()
         df = web.DataReader("AAPL", 'yahoo', start, end)
         return df
 
-    def getdata(symbol):
+    def get_yahoo_finance_data(symbol):
         style.use('ggplot')
-
-        start = dt.datetime(2009, 1, 1)
+        start = dt.datetime(1980, 1, 1)
         end = dt.datetime.now()
         try:
             df = web.DataReader(symbol, 'yahoo', start, end)
             df.reset_index(inplace=True)
             return df
-
         except:
             return pd.read_csv('CSVFiles/aapl.csv').reset_index(inplace=True)
 
-    def gettimesereis(key, symbol, time_val):
+    def get_aa_timesereis(key, symbol, time_val):
         ts = TimeSeries(key, output_format='pandas', indexing_type='date')
         if time_val == 'd':
-            # data, meta_data = ts.get_intraday(symbol='MSFT',interval='1min', outputsize='full')
             data, meta_data = ts.get_daily(symbol=symbol, outputsize='full')
         else:
             data, meta_data = ts.get_intraday(symbol=symbol, interval='1min', outputsize='full')
@@ -54,22 +48,12 @@ class Stocks:
                     inplace=True)
         return data
 
-    def getdatadaily(symbol, time_val):
+    def get_data_daily(symbol, time_val):
         keylist = getapikey()
         for key in keylist:
-            print(key)
             try:
-                return Stocks.gettimesereis(key, symbol, time_val)
+                return Stocks.get_aa_timesereis(key, symbol, time_val)
             except:
-                continue
                 # next key
-        return Stocks.getdata(symbol)
-
-
-    def printdata(symbol):
-        style.use('ggplot')
-
-        start = dt.datetime(2009, 1, 1)
-        end = dt.datetime.now()
-        df = web.DataReader("DOX", 'yahoo', start, end)
-        return df
+                continue
+        return Stocks.get_yahoo_finance_data(symbol)

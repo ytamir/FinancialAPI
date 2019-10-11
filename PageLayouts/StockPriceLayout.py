@@ -3,7 +3,7 @@ import plotly.graph_objs as go
 import dash_html_components as html
 
 
-def construct_layout(drop_down_symbols):
+def construct_layout():
     return [html.Br(),
             dcc.RadioItems(id='home_radio-items',
                            options=[{'label': 'Stock Price',

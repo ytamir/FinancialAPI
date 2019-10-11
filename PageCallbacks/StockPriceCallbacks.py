@@ -1,5 +1,5 @@
 import plotly.graph_objs as go
-from PyhonRequestFiles.stock import Stocks
+from PyhonRequestFiles.StockPrice import Stocks
 from dash.dependencies import Input, Output
 
 def register_callbacks(app):
@@ -12,7 +12,7 @@ def register_callbacks(app):
         trace = []
         if input_symbols is not None:
             for symbol in input_symbols:
-                stock_data = Stocks.getdatadaily(symbol, time_val)
+                stock_data = Stocks.get_data_daily(symbol, time_val)
                 if candle_val == 'C':
                     trace.append(
                         go.Candlestick(x=stock_data['Date'], open=stock_data['Open'],

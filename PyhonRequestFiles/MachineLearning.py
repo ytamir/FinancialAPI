@@ -531,4 +531,3 @@ class ML:
         #plt.xlim(datatotrain, datasize)
         #plt.show()
 #ml = ML.getdata(['XOM'])
-

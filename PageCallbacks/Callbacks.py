@@ -1,7 +1,7 @@
-from PageCallbacks import HomePageCallbacks, FinancialMetricsCallbacks, MachineLearningCallbacks
+from PageCallbacks import StockPriceCallbacks, FinancialMetricsCallbacks, MachineLearningCallbacks
 
 
 def register_callbacks(app, cache, cache_timeout, redis_instance):
-    HomePageCallbacks.register_callbacks(app)
+    StockPriceCallbacks.register_callbacks(app)
     FinancialMetricsCallbacks.register_callbacks(app, cache, cache_timeout, redis_instance)
     MachineLearningCallbacks.register_callbacks(app)
