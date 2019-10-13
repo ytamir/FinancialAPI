@@ -2,14 +2,14 @@ import xmlrunner
 import unittest
 
 loader = unittest.TestLoader()
-suite_one = loader.discover('.\\ConfigFilesTests')
+suite_one = loader.discover('UnitTests\\ConfigFilesTests')
 loader = unittest.TestLoader()
-suite_two = loader.discover('.\\PageCallbacksTests')
+suite_two = loader.discover('UnitTests\\PageCallbacksTests')
 loader = unittest.TestLoader()
-suite_three = loader.discover('.\\PageLayoutsTests')
+suite_three = loader.discover('UnitTests\\PageLayoutsTests')
 loader = unittest.TestLoader()
-suite_four = loader.discover('.\\PythonRequestFileTests')
+suite_four = loader.discover('UnitTests\\PythonRequestFileTests')
 suite_all = unittest.TestSuite([suite_one, suite_two, suite_three, suite_four])
 runner = xmlrunner.XMLTestRunner(
-                output=".\\TestResults")
+                output="TestResults")
 runner.run(suite_all)

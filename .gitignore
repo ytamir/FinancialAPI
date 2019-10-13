@@ -2,4 +2,5 @@
 CSVFILES/test.csv
 .idea/*
 __pycache__/
-*.exe
+SeleniumIntegrationTests/TestResults/*
+UnitTests/TestResults/*
