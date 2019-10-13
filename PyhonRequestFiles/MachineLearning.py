@@ -3,89 +3,23 @@
 from pandas_datareader import data
 # Make sure that you have all these libaries available to run the code successfully
 from pandas_datareader import data
-import matplotlib.pyplot as plt
-import pandas as pd
-import datetime as dt
-import urllib.request, json
-import os
-import numpy as np
-import tensorflow as tf  # This code has been tested with TensorFlow 1.6
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.python.framework import ops
+from PyhonRequestFiles.StockPrice import Stocks
+import datetime as dt
+import numpy as np
+import tensorflow as tf  # This code has been tested with TensorFlow 1.6
+
 import plotly.graph_objs as go
 
 data_source = 'alphavantage'  # alphavantage or kaggle
+tf.compat.v1.disable_eager_execution()
 
 
 class ML:
     def getdata(ticker):
-       # ticker = tickers[0]
-        print("ticker")
-        print(ticker)
-        if data_source == 'alphavantage':
-            # ====================== Loading Data from Alpha Vantage ==================================
-
-            api_key = '2EZEWPMATIECO9ZE'
-
-            # American Airlines stock market prices
-            # ticker = "MSFT"
-
-            # JSON file with all the stock market data for AAL within the last 20 years
-            url_string = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=%s&outputsize=full&apikey=%s" % (
-                ticker, api_key)
-
-            # Save data to this file
-            file_to_save = 'stock_market_data-%s.csv' % ticker
-
-            # If you haven't already saved data,
-            # Go ahead and grab the data from the url
-            # And store date, low, high, volume, close, open values to a Pandas dataframe
-            if not os.path.exists(file_to_save):
-                with urllib.request.urlopen(url_string) as url:
-                    data = json.loads(url.read().decode())
-                    # extract stock market data
-                    data = data['Time Series (Daily)']
-                    df = pd.DataFrame(columns=['Date', 'Low', 'High', 'Close', 'Open'])
-                    for k, v in data.items():
-                        date = dt.datetime.strptime(k, '%Y-%m-%d')
-                        data_row = [date.date(), float(v['3. low']), float(v['2. high']),
-                                    float(v['4. close']), float(v['1. open'])]
-                        df.loc[-1, :] = data_row
-                        df.index = df.index + 1
-                print('Data saved to : %s' % file_to_save)
-                df.to_csv(file_to_save)
-
-            # If the data is already there, just load it from the CSV
-            else:
-                print('File already exists. Loading data from CSV')
-                df = pd.read_csv(file_to_save)
-
-        else:
-
-            # ====================== Loading Data from Kaggle ================================== You will be using
-            # HP's data. Feel free to experiment with other data. But while doing so, be careful to have a large
-            # enough dataset and also pay attention to the data normalization
-            df = pd.read_csv(os.path.join('Stocks', 'hpq.us.txt'), delimiter=',',
-                             usecols=['Date', 'Open', 'High', 'Low', 'Close'])
-            print('Loaded data from the Kaggle repository')
-
-        # Sort DataFrame by date
-        # Sort dataframe by date
-        df = df.sort_values('Date')
-        df = df.drop(df.columns[0], axis=1)
-        # Double check the result
-        # df = df.iloc[::-1]
-        print(df)
-        print(df.head())
-
-        #plt.figure(figsize=(18, 9))
-        #plt.plot(range(df.shape[0]), (df['Low'] + df['High']) / 2.0)
-        #plt.xticks(range(0, df.shape[0], 500), df['Date'].loc[::500], rotation=45)
-        #plt.xlabel('Date', fontsize=18)
-        #plt.ylabel('Mid Price', fontsize=18)
-        #plt.show()
-
-        # Double check the result
+        # ticker = tickers[0]
+        df = Stocks.get_yahoo_finance_data(ticker)
 
         high_prices = df.loc[:, 'High'].as_matrix()
         low_prices = df.loc[:, 'Low'].as_matrix()
@@ -93,14 +27,10 @@ class ML:
 
         datasize = int(len(df) * .9)
         datatotrain = int(datasize * .80)
-        print("datasize")
-        print(datasize)
-        print("datatotrain")
-        print(datatotrain)
+
 
         train_data = mid_prices[:datatotrain]
         test_data = mid_prices[datatotrain:]
-        print(mid_prices.size)
 
         # Scale the data to be between 0 and 1
         # When scaling remember! You normalize both test and train data with respect to training data
@@ -111,8 +41,6 @@ class ML:
 
         # Train the Scaler with training data and smooth data
         smoothing_window_size = int(train_data.size / 4)
-        print(smoothing_window_size)
-        print(int(mid_prices.size / 2))
 
         for di in range(0, int(mid_prices.size / 2), smoothing_window_size):
             scaler.fit(train_data[di:di + smoothing_window_size, :])
@@ -159,14 +87,14 @@ class ML:
 
         print('MSE error for standard averaging: %.5f' % (0.5 * np.mean(mse_errors)))
 
-        #plt.figure(figsize=(18, 9))
-        #plt.plot(range(df.shape[0]), all_mid_data, color='b', label='True')
-        #plt.plot(range(window_size, N), std_avg_predictions, color='orange', label='Prediction')
+        # plt.figure(figsize=(18, 9))
+        # plt.plot(range(df.shape[0]), all_mid_data, color='b', label='True')
+        # plt.plot(range(window_size, N), std_avg_predictions, color='orange', label='Prediction')
         ## plt.xticks(range(0,df.shape[0],50),df['Date'].loc[::50],rotation=45)
-        #plt.xlabel('Date')
-        #plt.ylabel('Mid Price')
-        #plt.legend(fontsize=18)
-        #plt.show()
+        # plt.xlabel('Date')
+        # plt.ylabel('Mid Price')
+        # plt.legend(fontsize=18)
+        # plt.show()
 
         window_size = 100
         N = train_data.size
@@ -189,14 +117,14 @@ class ML:
 
         print('MSE error for EMA averaging: %.5f' % (0.5 * np.mean(mse_errors)))
 
-        #plt.figure(figsize=(18, 9))
-        #plt.plot(range(df.shape[0]), all_mid_data, color='b', label='True')
-        #plt.plot(range(0, N), run_avg_predictions, color='orange', label='Prediction')
+        # plt.figure(figsize=(18, 9))
+        # plt.plot(range(df.shape[0]), all_mid_data, color='b', label='True')
+        # plt.plot(range(0, N), run_avg_predictions, color='orange', label='Prediction')
         ## plt.xticks(range(0,df.shape[0],50),df['Date'].loc[::50],rotation=45)
-        #plt.xlabel('Date')
-        #plt.ylabel('Mid Price')
-        #plt.legend(fontsize=18)
-        #plt.show()
+        # plt.xlabel('Date')
+        # plt.ylabel('Mid Price')
+        # plt.legend(fontsize=18)
+        # plt.show()
 
         class DataGeneratorSeq(object):
 
@@ -365,9 +293,8 @@ class ML:
 
         print('\tAll done')
 
-        epochs = 15 # 30
+        epochs = 15  # 30
         valid_summary = 1  # Interval you make test predictions
-
         n_predict_once = 25  # Number of steps you continously predict for 50
 
         train_seq_length = train_data.size  # Full length of the training data
@@ -496,38 +423,9 @@ class ML:
                 predictions_over_time.append(predictions_seq)
                 print('\tFinished Predictions')
 
-        best_prediction_epoch = 13  # replace this with the epoch that you got the best results when running the plotting code
+        ret_xaxis = []
+        for a in x_axis_seq:
+            ret_xaxis.append(df.iloc[a])
 
-        # plt.figure(figsize=(18, 18))
-        # plt.subplot(2, 1, 1)
-       #  plt.plot(range(df.shape[0]), all_mid_data, color='b')
-
-        # Plotting how the predictions change over time
-        # Plot older predictions with low alpha and newer predictions with high alpha
-        start_alpha = 0.25
-        alpha = np.arange(start_alpha, 1.1, (1.0 - start_alpha) / len(predictions_over_time[::3]))
-       # for p_i, p in enumerate(predictions_over_time[::3]):
-          #  for xval, yval in zip(x_axis_seq, p):
-              #  plt.plot(xval, yval, color='r', alpha=alpha[p_i])
-
-       # plt.title('Evolution of Test Predictions Over Time', fontsize=18)
-       # plt.xlabel('Date', fontsize=18)
-       # plt.ylabel('Mid Price', fontsize=18)
-        ##plt.xlim(datatotrain, datasize)
-        plt.subplot(2, 1, 2)
-
-        #  Predicting the best test prediction you got
-        trace = []
-        #plt.plot(range(df.shape[0]), all_mid_data, color='b')
-        #for xval, yval in zip(x_axis_seq, predictions_over_time[best_prediction_epoch]):
-            #plt.plot(xval, yval, color='r')
-        #print('all_mid_data')
-        #print(all_mid_data)
-            #trace.append(go.Scatter(x=xval, y=yval, name=ticker, mode='lines'))
-        return x_axis_seq, predictions_over_time, all_mid_data
-        #plt.title('Best Test Predictions Over Time', fontsize=18)
-        #plt.xlabel('Date', fontsize=18)
-        #plt.ylabel('Mid Price', fontsize=18)
-        #plt.xlim(datatotrain, datasize)
-        #plt.show()
-#ml = ML.getdata(['XOM'])
+        return df, ret_xaxis, predictions_over_time, all_mid_data
+# ml = ML.getdata(['XOM'])
