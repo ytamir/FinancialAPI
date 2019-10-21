@@ -1,6 +1,8 @@
-
+*.exe
+.coverage
+coverage.xml
 CSVFILES/test.csv
 .idea/*
 __pycache__/
-SeleniumIntegrationTests/TestResults/*
-UnitTests/TestResults/*
+TestResults/*
+venv/*

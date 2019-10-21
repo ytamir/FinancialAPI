@@ -11,7 +11,7 @@ Flask_Caching==1.7.2
 Flask-Compress==1.4.0
 Flask_Redis==0.4.0
 gast==0.2.2
-numpy==1.15.4
+numpy==1.17.3
 matplotlib==3.1.1
 pandas==0.23.4
 pandas-datareader==0.7.0
