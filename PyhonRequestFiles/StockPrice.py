@@ -22,6 +22,8 @@ class Stocks:
         return df
 
     def get_yahoo_finance_data(symbol):
+        print('Symbol')
+        print(symbol)
         style.use('ggplot')
         start = dt.datetime(1980, 1, 1)
         end = dt.datetime.now()

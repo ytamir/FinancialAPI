@@ -1,0 +1,62 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 4 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: MachineLearning.py
+--------------------------------------------------------------------------------
+MachineLearning.py:279:27: WARNING: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib.rnn. (Manual edit required) tf.contrib.rnn.* has been deprecated, and widely used cells/functions will be moved to tensorflow/addons repository. Please check it there and file Github issues if necessary.
+MachineLearning.py:279:27: ERROR: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib. tf.contrib.rnn.DropoutWrapper cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+MachineLearning.py:285:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+MachineLearning.py:286:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'MachineLearning.py'
+ outputting to 'MachineLearning.py'
+--------------------------------------------------------------------------------
+
+269:32: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+270:33: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+273:12: INFO: Renamed 'tf.contrib.rnn.LSTMCell' to 'tf.compat.v1.nn.rnn_cell.LSTMCell'
+275:48: INFO: Changing tf.contrib.layers xavier initializer to a tf.compat.v1.keras.initializers.VarianceScaling and converting arguments.
+
+279:27: WARNING: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib.rnn. (Manual edit required) tf.contrib.rnn.* has been deprecated, and widely used cells/functions will be moved to tensorflow/addons repository. Please check it there and file Github issues if necessary.
+279:27: ERROR: Using member tf.contrib.rnn.DropoutWrapper in deprecated module tf.contrib. tf.contrib.rnn.DropoutWrapper cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+282:26: INFO: Renamed 'tf.contrib.rnn.MultiRNNCell' to 'tf.compat.v1.nn.rnn_cell.MultiRNNCell'
+283:21: INFO: Renamed 'tf.contrib.rnn.MultiRNNCell' to 'tf.compat.v1.nn.rnn_cell.MultiRNNCell'
+285:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+285:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+285:71: INFO: Changing tf.contrib.layers xavier initializer to a tf.compat.v1.keras.initializers.VarianceScaling and converting arguments.
+
+286:12: WARNING: tf.get_variable requires manual check. tf.get_variable returns ResourceVariables by default in 2.0, which have well-defined semantics and are stricter about shapes. You can disable this behavior by passing use_resource=False, or by calling tf.compat.v1.disable_resource_variables().
+286:12: INFO: Renamed 'tf.get_variable' to 'tf.compat.v1.get_variable'
+286:45: INFO: Renamed 'tf.random_uniform' to 'tf.random.uniform'
+294:33: INFO: Renamed 'tf.contrib.rnn.LSTMStateTuple' to 'tf.nn.rnn_cell.LSTMStateTuple'
+301:34: INFO: Renamed 'tf.nn.dynamic_rnn' to 'tf.compat.v1.nn.dynamic_rnn'
+307:22: INFO: Renamed 'tf.nn.xw_plus_b' to 'tf.compat.v1.nn.xw_plus_b'
+317:38: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+318:38: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+320:24: INFO: Added keywords to args of function 'tf.reduce_mean'
+324:20: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+325:27: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+326:31: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+329:12: INFO: tf.train.exponential_decay requires manual check. To use learning rate decay schedules with TensorFlow 2.0, switch to the schedules in `tf.keras.optimizers.schedules`.
+
+329:12: INFO: Renamed 'tf.train.exponential_decay' to 'tf.compat.v1.train.exponential_decay'
+334:20: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+344:24: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+351:40: INFO: Renamed 'tf.contrib.rnn.LSTMStateTuple' to 'tf.nn.rnn_cell.LSTMStateTuple'
+354:14: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+355:14: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+357:39: INFO: Renamed 'tf.nn.dynamic_rnn' to 'tf.compat.v1.nn.dynamic_rnn'
+362:38: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+363:38: INFO: Renamed 'tf.assign' to 'tf.compat.v1.assign'
+364:32: INFO: Renamed 'tf.nn.xw_plus_b' to 'tf.compat.v1.nn.xw_plus_b'
+379:18: INFO: Renamed 'tf.InteractiveSession' to 'tf.compat.v1.InteractiveSession'
+381:8: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+--------------------------------------------------------------------------------
+

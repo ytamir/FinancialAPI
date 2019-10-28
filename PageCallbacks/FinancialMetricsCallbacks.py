@@ -6,12 +6,9 @@ import numpy as np
 
 def register_callbacks(app, cache, cache_timeout, redis_instance):
 
-    @app.callback(Output('financial-metrics-table', 'figure'),
-                  [Input('drop_down_symbols', 'value'),
-                   Input('drop_down_metrics', 'value'),
-                   Input('length_radio', 'value')
-                   ])
+    @app.route('/financial_metrics/<tickers>')
     @cache.memoize(timeout=cache_timeout)  # in seconds
+    #def plot_revenue(stocks, metrics, quarterly_annual):
     def plot_revenue(stocks, metrics, quarterly_annual):
         trace = []
         color_dict = {}
