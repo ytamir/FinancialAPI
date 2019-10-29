@@ -174,7 +174,7 @@ class Dashboard extends Component {
     const totalInterest = monthlyInterest * (period + start);
     const totalPayment = amount + totalInterest;
     const monthlyPayment = period > start ? totalPayment/(period - start) : totalPayment/(period);
-    console.log(stockdata);
+    //console.log(stockdata);
     
    
 
@@ -186,19 +186,7 @@ class Dashboard extends Component {
         'OtherType': Math.ceil(monthlyInterest).toFixed(0)
       };
     })
-
-    
-      const stockdata =  {
-        title: {
-          text: 'My stock chart'
-        },
-        series: [
-          {
-            data: [1, 2, 1, 4, 3, 6, 7, 3, 8, 6, 9]
-          }
-        ]
-      };
-      this.setState({monthlyInterest, totalInterest, totalPayment, monthlyPayment, data, stockdata});
+      this.setState({monthlyInterest, totalInterest, totalPayment, monthlyPayment, data});
  
 
     
@@ -248,10 +236,10 @@ class Dashboard extends Component {
       let temp = [ parsed_data.Date[i], parsed_data.Open[i]];//, parsed_data.High[i], parsed_data.Low[i], parsed_data.Close[i]];
       newArray.push(temp);
     }
-    console.log(newArray);
+    console.log(event);
     let options = {
       title: {
-        text: 'My stock chart'
+        text: event.data[0].name
       },
 
       series: [
@@ -297,10 +285,11 @@ class Dashboard extends Component {
                 </div>
               </Grid>
 
-
+              
               <MultiSelect names={names} dashChange={this.handleChangeStock}/>
+              <div>
               <HighchartsReact highcharts={Highcharts} constructorType={'stockChart'} options={stockdata} />
-
+              </div>
               
               <Grid item xs={12} md={4}>
                 <Paper className={classes.paper}>

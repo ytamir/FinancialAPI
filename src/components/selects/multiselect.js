@@ -64,7 +64,7 @@ export default function MultipleSelect(props) {
     const axios = require('axios');
 
     // Make a request for a user with a given ID
-    var url = 'http://127.0.0.1:5000/get/daily_price/' + event.target.value + '/d/D';
+    var url = 'http://127.0.0.1:5000/get/daily_price/' + event.target.value + '/d/d';
     var ret = axios.get(url).then(function (response) {
         // handle success
         dashChange(response);
