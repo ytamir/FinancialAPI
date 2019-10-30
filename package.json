@@ -19,6 +19,7 @@
     "opencollective-postinstall": "^2.0.2",
     "query-string": "^6.2.0",
     "react": "^16.8.6",
+    "react-autosuggest": "^9.4.3",
     "react-dom": "^16.8.6",
     "react-highcharts": "^16.1.0",
     "react-jsx-highstock": "^3.6.1",

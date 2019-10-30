@@ -19,6 +19,7 @@ import StockChart from './Stock.jsx'
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Topbar from './Topbar';
+
 //import Highcharts from 'highcharts/highstock'
 //import StockHighChart from "constants/StockHighChart"
 
@@ -28,7 +29,7 @@ require('highcharts/modules/exporting')(Highcharts)
 require('highcharts/modules/map')(Highcharts)
 
 
-
+const stocksjson = require('./data.json');
 const numeral = require('numeral');
 numeral.defaultFormat('0,000');
 
@@ -127,7 +128,7 @@ const styles = theme => ({
 });
 
 const monthRange = Months;
-const  toptions1 = { series: [{name: 'Profit', data: [100,200,30,100,30,50,100]}]};
+const  toptions1 = { series: [{name: 'Profit', data: [100,200,30,100,30,50,100]},{name: 'Profit2', data: [222,22,1,123,1,312,100]} ]};
 
 class Dashboard extends Component {
 
@@ -143,6 +144,7 @@ class Dashboard extends Component {
     monthlyPayment: 0,
     totalPayment: 0,
     data: [],
+    stored_stocks: JSON.parse(stocksjson),
     stockdata: {
       title: {
         text: 'My stock chart'
