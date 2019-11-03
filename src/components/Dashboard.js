@@ -13,14 +13,21 @@ import Months from './common/Months';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import Loading from './common/Loading';
 import MultiSelect from './selects/multiselect';
-import Highcharts from 'highcharts/highstock';
+import HighchartsStock from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
+import Highcharts from 'highcharts'
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import Box from '@material-ui/core/Box';
+import { sizing } from '@material-ui/system';
 import { FixedSizeList as List } from 'react-window';
 import StockChart from './Stock.jsx'
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import DOWContainer from './DOW'
 import Topbar from './Topbar';
 
 //import Highcharts from 'highcharts/highstock'
@@ -334,6 +341,39 @@ class Dashboard extends Component {
                   </div>
                 </div>
               </Grid>
+
+
+              <Grid container justify="center" >
+                <Grid spacing={24} alignItems="center" justify="center" container className={classes.grid}>
+                  <Grid item xs={12}>
+                  <Box width="25%">
+                  <Card className={classes.card}>
+                    <CardContent>
+                      <Typography className={classes.title} color="textSecondary" gutterBottom>
+                        Dow Jones
+                      </Typography>
+                      <DOWContainer />
+                      <Typography className={classes.pos} color="textSecondary">
+                        adjective
+                      </Typography>
+                      <Typography variant="body2" component="p">
+                        well meaning and kindly.
+                        <br />
+                        {'"a benevolent smile"'}
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button size="small">Learn More</Button>
+                    </CardActions>
+                  </Card>
+                  </Box>
+                  
+
+
+                    </Grid>
+                    </Grid>
+                    </Grid>
+
               <div style={{ width: 500 }}>
               <Autocomplete
                 multiple
@@ -355,7 +395,7 @@ class Dashboard extends Component {
               </div>
               <MultiSelect names={names} dashChange={this.handleChangeStock}/>
               <div>
-              <HighchartsReact highcharts={Highcharts} constructorType={'stockChart'} options={stockdata} />
+              <HighchartsReact highcharts={HighchartsStock} constructorType={'stockChart'} options={stockdata} />
               </div>
               
               <Grid item xs={12} md={4}>
