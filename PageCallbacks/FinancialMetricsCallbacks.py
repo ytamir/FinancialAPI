@@ -1,46 +1,44 @@
-import plotly.graph_objs as go
 from PyhonRequestFiles import FinancialStatementsJSONParser
-from dash.dependencies import Input, Output
-import numpy as np
+
+# TODO REMOVE THIS AND RENAME METHOD
+# TODO ADD INPUT VALIDATION, RESPONSE CODES, ERROR HANDLING
 
 
 def register_callbacks(app, cache, cache_timeout, redis_instance):
 
-    @app.route('/financial_metrics/<tickers>')
+    @app.route('/financial-metrics/<list:tickers>/<list:metrics>/<string:quarterly_annual>', methods=['GET'])
     @cache.memoize(timeout=cache_timeout)  # in seconds
-    #def plot_revenue(stocks, metrics, quarterly_annual):
-    def plot_revenue(stocks, metrics, quarterly_annual):
-        trace = []
-        color_dict = {}
+    def plot_revenue(tickers, metrics, quarterly_annual):
+        return_data = []
 
-        # COLORS
-        for stock in stocks:
-            color_dict.update({stock: {"color": "rgb" + str(
-                tuple(list(np.random.choice(range(0, 200), size=3))))}})
+        if quarterly_annual.upper == "QUARTERLY":
+            quarterly_annual = 1
+        else:
+            quarterly_annual = 0
 
         # Retrieved cached data and append it to our return value
         for index, metric in enumerate(metrics):
-            for stock in stocks:
+            for stock in tickers:
                 dates_data = get_cached_data(stock, metric, quarterly_annual, redis_instance)
 
                 if dates_data[0] and dates_data[1]:
                     # print("Using Old Data For " + stock + " " + metric + ".")
                     # print(dates_data[1])
-                    trace.append(
-                        go.Scatter(x=dates_data[0], y=dates_data[1], name=stock + ": " + metric,
-                                   mode='lines+markers', line=color_dict[stock]))
+                    return_data.append({"ticker": stock, "metric": metric, "dates": dates_data[0],
+                                        "data": dates_data[1]})
 
         # Get a list of symbols we can ignore for different metrics because of cached data
-        symbols_to_ignore_for_metric = construct_symbols_to_ignore(stocks, metrics, quarterly_annual)
+        symbols_to_ignore_for_metric = construct_symbols_to_ignore(tickers, metrics, quarterly_annual)
 
         # Filter metrics so we don't request data we do not need because of cached data
-        filtered_metrics = [i for j, i in enumerate(metrics) if j not in indices_to_remove(metrics, stocks,
+        filtered_metrics = [i for j, i in enumerate(metrics) if j not in indices_to_remove(metrics, tickers,
                                                                                            quarterly_annual,
                                                                                            remove_stocks=False)]
         # Filter stocks so we don't request data we do not need because of cached data
-        filtered_stocks = [i for j, i in enumerate(stocks) if j not in indices_to_remove(stocks, metrics,
-                                                                                         quarterly_annual,
-                                                                                         remove_stocks=True)]
+        filtered_stocks = [i for j, i in enumerate(tickers) if j not in indices_to_remove(tickers, metrics,
+                                                                                          quarterly_annual,
+                                                                                          remove_stocks=True)]
+
         # Make API request with filtered data and symbols
         stock_data = FinancialStatementsJSONParser.fetch_data(quarterly_annual, filtered_metrics, filtered_stocks,
                                                               symbols_to_ignore_for_metric)
@@ -51,10 +49,10 @@ def register_callbacks(app, cache, cache_timeout, redis_instance):
             # print(data["DATA"])
 
             # Add data to return
-            trace.append(go.Scatter(x=data["DATES"], y=data["DATA"], name=data["SYMBOL"] + ": " + data["METRIC"],
-                                    mode='lines+markers', line=color_dict[data["SYMBOL"]]))
-        # Return our plots
-        return {"data": trace}
+            return_data.append({"ticker": data["SYMBOL"], "metric": data["METRIC"], "dates": data["DATES"],
+                                "data": data["DATA"]})
+
+        return {"return_data": return_data}
 
     def cache_data(data, quarterly_or_annual, cache_expire, redis_connection):
         """
