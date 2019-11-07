@@ -27,7 +27,7 @@ import { FixedSizeList as List } from 'react-window';
 import StockChart from './Stock.jsx'
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import DOWContainer from './DOW'
+import IndexContainer from './DOW'
 import Topbar from './Topbar';
 
 //import Highcharts from 'highcharts/highstock'
@@ -344,27 +344,50 @@ class Dashboard extends Component {
 
 
               <Grid container justify="center" >
-                <Grid spacing={24} alignItems="center" justify="center" container className={classes.grid}>
-                  <Grid item xs={12}>
-                  <Box width="25%">
+                <Grid spacing={3} alignItems="center" justify="center" container className={classes.grid}>
+                  <Grid item xs={3}>
                   <Card className={classes.card}>
                     <CardContent>
                       <Typography className={classes.title} color="textSecondary" gutterBottom>
                         Dow Jones
                       </Typography>
-                      <DOWContainer />
+                      <IndexContainer indexname = ".DJI" />
                     </CardContent>
-                    <CardActions>
-                      <Button size="small">Learn More</Button>
-                    </CardActions>
                   </Card>
-                  </Box>
+                  </Grid>
+                  <Grid item xs={3}>
+                  <Card className={classes.card}>
+                    <CardContent>
+                      <Typography className={classes.title} color="textSecondary" gutterBottom>
+                        Nasdaq
+                      </Typography>
+                      <IndexContainer indexname = ".IXIC" />
+                    </CardContent>
+                  </Card>
+                  </Grid>
+                  <Grid item xs={3}>
+                  <Card className={classes.card}>
+                    <CardContent>
+                      <Typography className={classes.title} color="textSecondary" gutterBottom>
+                        S&P 500 
+                      </Typography>
+                      <IndexContainer indexname = ".INX" />
+                    </CardContent>
+                  </Card>
+                  </Grid>
+                  <Grid item xs={3}>
+                  <Card className={classes.card}>
+                    <CardContent>
+                      <Typography className={classes.title} color="textSecondary" gutterBottom>
+                        NYSE
+                      </Typography>
+                      <IndexContainer indexname = "%5ENYA" />
+                    </CardContent>
+                  </Card>
+                  </Grid>
                   
-
-
-                    </Grid>
-                    </Grid>
-                    </Grid>
+                  </Grid>
+                  </Grid>
 
               <div style={{ width: 500 }}>
               <Autocomplete
@@ -387,7 +410,7 @@ class Dashboard extends Component {
               </div>
               <MultiSelect names={names} dashChange={this.handleChangeStock}/>
               <div>
-              <HighchartsReact highcharts={HighchartsStock} constructorType={'stockChart'} options={stockdata} />
+              <HighchartsReact highcharts={HighchartsStock} title="d" constructorType={'stockChart'} options={stockdata} />
               </div>
               
               <Grid item xs={12} md={4}>

@@ -2,12 +2,14 @@ import React from 'react'
 import HighchartsReact from 'highcharts-react-official'
 import Highcharts from 'highcharts'
 
-export default class Container extends React.Component {
+export default class IndexContainer extends React.Component {
   constructor () {
     super()
     this.state = { // TODO remove chart title
       chartOptions: {
-        title: {text: null},
+        title: {
+            text: 'My chart'
+          },
         exporting: {
             buttons: {
                 contextButton: {
@@ -74,7 +76,7 @@ export default class Container extends React.Component {
         
 
 
-        let url = "https://financialmodelingprep.com/api/v3/majors-indexes/.DJI";
+        let url = "https://financialmodelingprep.com/api/v3/majors-indexes/" + this.props.indexname;
         axios.get(url).then(function (response) {
             // handle success
            
@@ -108,7 +110,9 @@ export default class Container extends React.Component {
                 negativeColor: '#0088FF' ,
                 threshold: 2
             }],
-            title: {text: null},
+            title: {
+                text: ''
+              },
             xAxis:{
                 visible: false
             },
@@ -155,6 +159,8 @@ export default class Container extends React.Component {
         }});
   }
 
+
+  
 
   render () {
     return (
