@@ -1,58 +1,126 @@
+from flask import request, Response
 from PyhonRequestFiles import FinancialStatementsJSONParser
+import json
+import MetricsConfig
 
-# TODO REMOVE THIS AND RENAME METHOD
-# TODO ADD INPUT VALIDATION, RESPONSE CODES, ERROR HANDLING
+
+def make_memoized_key():
+    """Method to create cache key for memoized data so we can include request parameters"""
+    return request.full_path
 
 
-def register_callbacks(app, cache, cache_timeout, redis_instance):
-
-    @app.route('/financial-metrics/<list:tickers>/<list:metrics>/<string:quarterly_annual>', methods=['GET'])
-    @cache.memoize(timeout=cache_timeout)  # in seconds
-    def plot_revenue(tickers, metrics, quarterly_annual):
+def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
+    """
+    Used to register the API endpoint of the form "/financial-metrics?stocks=CERN&metrics=REVENUE&frequency=ANNUAL"
+    :param app: Flask App
+    :param cache: Flask Cache
+    :param cache_timeout: Flask cache timeout set at app level
+    :param redis_instance: Redis instance for caching
+    :param symbols: List of valid ticker symbols
+    """
+    @app.route('/financial-metrics', methods=['GET'])
+    @cache.cached(timeout=cache_timeout, key_prefix=make_memoized_key)
+    def plot_revenue():
+        """Method to handle request for financial data"""
         return_data = []
 
-        if quarterly_annual.upper == "QUARTERLY":
+        # Fetch Data From Parameters
+        tickers = request.args.get('stocks', None)
+        tickers = tickers.split(";")
+        metrics = request.args.get('metrics', None)
+        metrics = metrics.split(";")
+        quarterly_annual = request.args.get('frequency', None)
+
+        # Validate data before proceeding
+        # Check that all request parameters were passed in correctly
+        if tickers is None or metrics is None or quarterly_annual is None:
+            return Response(json.dumps({'HTTP ERROR 400': 'Not all request parameters specified'}),
+                            status=400,
+                            mimetype="application/json")
+        # Validate Tickers
+        for ticker in tickers:
+            if ticker not in symbols:
+                tickers.remove(ticker)
+        if not tickers:
+            return Response(json.dumps({'HTTP ERROR 400': 'Ticker Symbols are invalid'}),
+                            status=400,
+                            mimetype="application/json")
+        # Validate Metrics
+        for metric in metrics:
+            if metric not in MetricsConfig.main_dictionary["all_metrics"]:
+                metrics.remove(metric)
+        if not metrics:
+            return Response(json.dumps({'HTTP ERROR 400': 'Metrics are invalid'}),
+                            status=400,
+                            mimetype="application/json")
+        # Check Frequency
+        if quarterly_annual.upper() != "ANNUAL" and quarterly_annual.upper() != "QUARTERLY":
+            return Response(json.dumps({'HTTP ERROR 400': 'Frequency must be Quarterly or Annual'}),
+                            status=400,
+                            mimetype="application/json")
+
+        # Convert from string to int for handling request
+        if quarterly_annual.upper() == "ANNUAL":
             quarterly_annual = 1
-        else:
+        elif quarterly_annual.upper() == "QUARTERLY":
             quarterly_annual = 0
 
         # Retrieved cached data and append it to our return value
-        for index, metric in enumerate(metrics):
-            for stock in tickers:
-                dates_data = get_cached_data(stock, metric, quarterly_annual, redis_instance)
+        try:
+            for index, metric in enumerate(metrics):
+                for stock in tickers:
+                    dates_data = get_cached_data(stock, metric, quarterly_annual, redis_instance)
+                    if dates_data[0] and dates_data[1]:
+                        return_data.append({"ticker": stock, "metric": metric, "dates": dates_data[0],
+                                            "data": dates_data[1]})
+        except Exception:
+            return Response(json.dumps({'HTTP ERROR 400': 'Error fetching cached data'}),
+                            status=400,
+                            mimetype="application/json")
 
-                if dates_data[0] and dates_data[1]:
-                    # print("Using Old Data For " + stock + " " + metric + ".")
-                    # print(dates_data[1])
-                    return_data.append({"ticker": stock, "metric": metric, "dates": dates_data[0],
-                                        "data": dates_data[1]})
-
-        # Get a list of symbols we can ignore for different metrics because of cached data
-        symbols_to_ignore_for_metric = construct_symbols_to_ignore(tickers, metrics, quarterly_annual)
-
-        # Filter metrics so we don't request data we do not need because of cached data
-        filtered_metrics = [i for j, i in enumerate(metrics) if j not in indices_to_remove(metrics, tickers,
-                                                                                           quarterly_annual,
-                                                                                           remove_stocks=False)]
-        # Filter stocks so we don't request data we do not need because of cached data
-        filtered_stocks = [i for j, i in enumerate(tickers) if j not in indices_to_remove(tickers, metrics,
-                                                                                          quarterly_annual,
-                                                                                          remove_stocks=True)]
+        # Get a list of symbols and metrics we can ignore for different metrics because of cached data
+        try:
+            symbols_to_ignore_for_metric = construct_symbols_to_ignore(tickers, metrics, quarterly_annual)
+            filtered_metrics = [i for j, i in enumerate(metrics) if j not in indices_to_remove(metrics, tickers,
+                                                                                               quarterly_annual,
+                                                                                               remove_stocks=False)]
+            filtered_stocks = [i for j, i in enumerate(tickers) if j not in indices_to_remove(tickers, metrics,
+                                                                                              quarterly_annual,
+                                                                                              remove_stocks=True)]
+        except Exception:
+            return Response(json.dumps({'HTTP ERROR 400': 'Error filtering stock symbols and metrics'}),
+                            status=400,
+                            mimetype="application/json")
 
         # Make API request with filtered data and symbols
-        stock_data = FinancialStatementsJSONParser.fetch_data(quarterly_annual, filtered_metrics, filtered_stocks,
-                                                              symbols_to_ignore_for_metric)
+        try:
+            stock_data = FinancialStatementsJSONParser.fetch_data(quarterly_annual, filtered_metrics, filtered_stocks,
+                                                                  symbols_to_ignore_for_metric)
+        except Exception:
+            return Response(json.dumps({'HTTP ERROR 400': 'Error fetching data from API'}),
+                            status=400,
+                            mimetype="application/json")
+
         for data in stock_data:
-            # Install data in redis cache for data we have not cached yet
-            cache_data(data, quarterly_annual, cache_timeout, redis_instance)
-            # print("USING NEW DATA FOR " + data["SYMBOL"] + " " + data["METRIC"] + ".")
-            # print(data["DATA"])
+            # Install data in redis cache for data we have not cached yet and add data to return
+            try:
 
-            # Add data to return
-            return_data.append({"ticker": data["SYMBOL"], "metric": data["METRIC"], "dates": data["DATES"],
-                                "data": data["DATA"]})
+                cache_data(data, quarterly_annual, cache_timeout, redis_instance)
+                return_data.append({"ticker": data["SYMBOL"], "metric": data["METRIC"], "dates": data["DATES"],
+                                    "data": data["DATA"]})
+            except Exception:
+                return Response(json.dumps({'HTTP ERROR 400': 'Error Installing Data in the Cache'}),
+                                status=204,
+                                mimetype="application/json")
 
-        return {"return_data": return_data}
+        if not return_data:
+            return Response(json.dumps({'HTTP 204': 'No Data Found'}),
+                            status=204,
+                            mimetype="application/json")
+        else:
+            return Response(json.dumps({"return_data": return_data}),
+                            status=200,
+                            mimetype="application/json")
 
     def cache_data(data, quarterly_or_annual, cache_expire, redis_connection):
         """
@@ -123,7 +191,6 @@ def register_callbacks(app, cache, cache_timeout, redis_instance):
         :param remove_stocks: If true we are filtering stock list, otherwise filtering the metrics list
         """
         remove_indices = []
-
         for index, value1 in enumerate(list1):
             remove = True
             for value2 in list2:
