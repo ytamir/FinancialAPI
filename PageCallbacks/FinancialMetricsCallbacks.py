@@ -1,7 +1,7 @@
 from flask import request, Response
 from PyhonRequestFiles import FinancialStatementsJSONParser
 import json
-import MetricsConfig
+from ConfigFiles import MetricsConfig
 
 
 def make_memoized_key():
