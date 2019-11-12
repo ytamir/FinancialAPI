@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\PolerYarden\\.virtualenvs\\FinancialAnalysis-N1wW4cp9\\Scripts\\python.exe"
+    "python.pythonPath": "C:\\Users\\PolerYarden\\.virtualenvs\\FinancialAnalysis-N1wW4cp9\\Scripts\\python.exe",
+    "python.linting.pylintEnabled": true
 }
