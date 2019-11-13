@@ -1,9 +1,5 @@
 from ConfigFiles import MetricsConfig
 import requests
-import sys
-
-sys.stdout = sys.__stdout__
-sys.stderr = sys.__stderr__
 
 
 def build_url(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric):
@@ -45,7 +41,6 @@ def build_url(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric):
                 else:
                     url = url[:-1]
                     url += "?period="
-
                     if quarterly_annual == MetricsConfig.Frequencies.QUARTERLY:
                         url += "quarter"
                     elif quarterly_annual == MetricsConfig.Frequencies.ANNUAL:
@@ -144,13 +139,3 @@ def fetch_data(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric):
     else:
         urls_dict = build_url(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric)
         return parse_json(urls_dict)
-
-
-# symbols = ["AAPL", "GRMN", "CERN"]
-# metric_ex = ["NUMBER OF SHARES", "NIPEREBT", "Market Capitalization"]
-# frequency = MetricsConfig.Frequencies.QUARTERLY
-# print(fetch_data(frequency, metric_ex, symbols))
-
-
-
-
