@@ -6,6 +6,7 @@ dash-daq==0.1.0
 dash-html-components==1.0.0
 dash-renderer==1.0.0
 dash-table==4.1.0
+fake-useragent==0.1.11
 Flask==1.1.1
 Flask_Caching==1.7.2
 Flask-Compress==1.4.0
