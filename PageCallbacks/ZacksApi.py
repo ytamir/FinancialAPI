@@ -10,16 +10,16 @@ def register_api(app):
         """
         This function takes in a ticker symbol from the Url and returns the json formatted holding data or an error
         :return: Either HTTP Status Code Error or Holding Data in Json Format
-                 JSON Format "Holdings : { Holding 1: [ shares, %portfolio, 52week changed ], ... }"
         """
 
         ticker = request.args.get('ticker', None)
         if ticker is None:
-            return Response(json.dumps({'HTTP ERROR 400': 'Not all request parameters specified'}),
-                            status=400,
-                            mimetype="application/json")
+            return Response(json.dumps({'HTTP ERROR 400': 'Not all request parameters specified'}, indent=4,
+                                       sort_keys=True), status=400)
         else:
-            # TODO Add More Validation and check whether the ticker is ETF or Mutual Fund
-            return Response(json.dumps(ZacksScraper.scrape_holdings(ticker, True)),
-                            status=200,
-                            mimetype="application/json")
+            try:
+                success_json = ZacksScraper.scrape_etf_holdings(ticker)
+                return Response(success_json, status=200)
+            except:
+                return Response(json.dumps({'HTTP ERROR 404': 'Error Fetching ETF Data'}, indent=4, sort_keys=True),
+                                status=404)
