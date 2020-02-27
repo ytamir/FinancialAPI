@@ -50,8 +50,16 @@ def scrape_etf_holdings(ticker):
             if formatted_name.startswith('<span '):
                 formatted_name = formatted_name[92:].split("\'", 1)[0].upper()
 
+            # Ticker is Wrapped in a link if it is available, otherwise store an empty string
+            formatted_ticker = holding_data[1]
+            if formatted_ticker.startswith('<a '):
+                formatted_ticker = formatted_ticker[40:].split("\"", 1)[0].upper()
+            else:
+                formatted_ticker = ""
+
             # Store Information in dict and append to holdings dict
-            stock_dict = {formatted_name: {"Number of Shares": holding_data[2],
+            stock_dict = {formatted_name: {"Ticker": formatted_ticker,
+                                           "Number of Shares": holding_data[2],
                                            "Percentage of Portfolio": holding_data[3],
                                            "Annual Percentage Change": holding_data[4]
                                            }
