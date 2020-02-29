@@ -3,7 +3,12 @@ from PyhonRequestFiles import ZacksScraper
 import json
 
 
-def register_api(app):
+def register_api(app, redis_instance):
+    """
+    Registers API for Zacks which includes: ETF Holdings Endpoint
+    :param app: Flask App
+    :param redis_instance: Redis DB
+    """
 
     @app.route('/etf-holdings', methods=['GET'])
     def holding_endpoint():
@@ -18,7 +23,7 @@ def register_api(app):
                                        sort_keys=True), status=400)
         else:
             try:
-                success_json = ZacksScraper.scrape_etf_holdings(ticker)
+                success_json = ZacksScraper.scrape_etf_holdings(ticker, redis_instance)
                 return Response(success_json, status=200)
             except:
                 return Response(json.dumps({'HTTP ERROR 404': 'Error Fetching ETF Data'}, indent=4, sort_keys=True),

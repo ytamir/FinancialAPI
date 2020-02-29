@@ -17,7 +17,7 @@ drop_down_symbols = [{'label': str(a), 'value': str(a)} for a in symbols]
 
 app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_HOST': os.getenv('REDIS_HOST')})
-cache_timeout = 3600
+cache_timeout = 86400# One Day
 redis_instance = Redis(host=os.getenv('REDIS_HOST'))
 CORS(app)
 Callbacks.register_callbacks(app, cache, cache_timeout, redis_instance, symbols)

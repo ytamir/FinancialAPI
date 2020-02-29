@@ -1,15 +1,17 @@
 from bs4 import BeautifulSoup as beautSoup
 from fake_useragent import UserAgent
+from redis import RedisError
 import json
 import requests
 import re
 
 
-def scrape_etf_holdings(ticker):
+def scrape_etf_holdings(ticker, redis_connection):
     """
     This function takes in an ETF/Mutual Fund Ticker along with a boolean and returns json format for holding data
     from Zacks
     :param: ticker: Ticker For ETF
+    :param: redis_connection: Connection to Redis DB
     :return: JSON Format {"Holdings": {"Microsoft Corp.": {"Number of Shares": "154,277,455",
                                                             "Percentage of Portfolio": "4.81",
                                                             "Annual Percentage Change": "54.00"
@@ -17,6 +19,15 @@ def scrape_etf_holdings(ticker):
                                       }
                         }
     """
+
+    # Try Redis Read First
+    try:
+        redis_data = read_redis(redis_connection, ticker)
+        if redis_data is not None:
+            return redis_data
+    except RedisError:
+        pass
+
     # Use User Agent so Zacks Does Not Reject Our Request and send request
     ua = UserAgent()
 
@@ -66,12 +77,55 @@ def scrape_etf_holdings(ticker):
                           }
             holdings_dict.update(stock_dict)
 
+        # Store JSON
+        json_val = json.dumps({"Holdings": holdings_dict}, indent=4, sort_keys=True)
+
+        # Try Writing to redis
+        try:
+            write_redis(redis_connection, ticker, json_val)
+        except RedisError:
+            pass
+
         # Return JSON Format
-        json_dict = {"Holdings": holdings_dict}
-        return json.dumps(json_dict, indent=4, sort_keys=True)
+        return json_val
 
     # Return If Error
     except:
         raise Exception('Error Fetching Data')
+
+
+def read_redis(redis_connection, key):
+    """
+    Collects Data from Redis Database
+    :param: redis_connection - Redis Connection
+    :param: key - Key to Store
+    :param: data - Data to Store
+    :return: Return Data if successful, Raise Error Otherwise
+    """
+    if redis_connection:
+        try:
+            return redis_connection.execute_command('JSON.GET', key)
+        except:
+            raise RedisError
+    else:
+        raise RedisError
+
+
+def write_redis(redis_connection, key, data):
+    """
+    Stores Data in Redis Database
+    :param: redis_connection - Redis Connection
+    :param: key - Key to Store
+    :param: data - Data to Store
+    :return: Return None, Raise Error Otherwise
+    """
+    if redis_connection:
+        try:
+            redis_connection.execute_command('JSON.SET', key, '.', data)
+            return None
+        except:
+            raise RedisError
+    else:
+        raise RedisError
 
 # print(scrape_etf_holdings("ZIG"))

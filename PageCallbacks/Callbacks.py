@@ -5,6 +5,6 @@ def register_callbacks(app,  cache, cache_timeout, redis_instance, symbols):
     StockPriceCallbacks.register_callbacks(app)
     FinancialMetricsCallbacks.register_callbacks(app, cache, cache_timeout, redis_instance, symbols)
     noredismetrics.register_callbacks(app, cache, cache_timeout, redis_instance, symbols)
-    ZacksApi.register_api(app)
+    ZacksApi.register_api(app, redis_instance)
     # MachineLearningCallbacks.register_callbacks(app)
     StocksInfo.register_callbacks(app)
