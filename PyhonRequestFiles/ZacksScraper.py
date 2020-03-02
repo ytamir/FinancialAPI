@@ -1,12 +1,14 @@
 from bs4 import BeautifulSoup as beautSoup
-from fake_useragent import UserAgent
+from datetime import date as date_library
+from fake_useragent import UserAgent as Ua
+from pymongo import errors as MongoErrors
 from redis import RedisError
 import json
 import requests
 import re
 
 
-def scrape_etf_holdings(ticker, redis_connection):
+def scrape_etf_holdings(ticker, mongo_db, redis_connection):
     """
     This function takes in an ETF/Mutual Fund Ticker along with a boolean and returns json format for holding data
     from Zacks
@@ -20,35 +22,56 @@ def scrape_etf_holdings(ticker, redis_connection):
                         }
     """
 
+    # Get Current Date For Querying Redis and Mongo
+    todays_date = date_library.today().strftime("%d/%m/%Y")
+
     # Try Redis Read First
     try:
-        redis_data = read_redis(redis_connection, ticker)
+        redis_data = read_redis(redis_connection, ticker+"-"+todays_date)
         if redis_data is not None:
             return redis_data
     except RedisError:
         pass
 
-    # Use User Agent so Zacks Does Not Reject Our Request and send request
-    ua = UserAgent()
-
+    # Try Mongo Read Second
     try:
+        mongo_data = read_mongo(mongo_db, todays_date, ticker)
+        if mongo_data is not None:
+            return json.dumps(mongo_data, indent=4)
+    except MongoErrors.PyMongoError:
+        pass
+    try:
+        # Make Request
+        ua = Ua()
         request_result = requests.get('https://www.zacks.com/funds/etf/' + ticker + '/holding',
                                       headers={"User-Agent": ua.random})
 
         # Heavily Reliant on Current Page Architecture
         # First Get Data inside script tag which contains holding data
-        html_content = beautSoup(request_result.content, 'html')
+        html_content = beautSoup(request_result.content, features="lxml")
+
         # Get Content in The Script Tag, All Holding Data is in script tag that we need to parse as a string
         script_tag_string = html_content.findAll('script', text=re.compile('var etf_holdings'))[0]
         # Find the ETF Holdings Array In the Whole Script Tag String
         etf_holdings_array_string = re.search(r'etf_holdings\.formatted_data.+\] \]', str(script_tag_string)).group()
-        # Replace the . in the javascript variable name so we can convert the array to python
-        text = re.sub(r'\.', '_', etf_holdings_array_string, count=1)
 
-        # Convert the string to a python array using exec that will be stored in etf_holdings_formatted_data
+        # Find the ETF Table Header In the Whole Script Tag String to get the date
+        etf_date_array_string = re.search(r'etf_holdings\.table_header.+;', str(script_tag_string)).group()
+
+        # Replace the . in the javascript variable names so we can convert the array to python
+        etf_holdings_text = re.sub(r'\.', '_', etf_holdings_array_string, count=1)
+        etf_date_text = re.sub(r'\.', '_', etf_date_array_string, count=1)
+
         # EXEC NOT SAFE HOPFEULLY: ZACKS DOES NOT SEND US MALLICIOUS CODE
-        text = "global etf_holdings_formatted_data; " + text
-        exec(text)
+        # Convert the string to a python array using exec that will be stored in etf_holdings_formatted_data
+        etf_holdings_text = "global etf_holdings_formatted_data; " + etf_holdings_text
+        # Convert the javascript string to a python string using exec that will be stored in etf_holdings_table_header
+        etf_date_text = "global etf_holdings_table_header; " + etf_date_text
+        exec(etf_holdings_text)
+        exec(etf_date_text)
+
+        # Get ETF Date From the Table Header
+        etf_date = etf_holdings_table_header.split("of ", 1)[1]
 
         # Get Data into dict format which is convertible to JSON
         holdings_dict = {}
@@ -78,20 +101,64 @@ def scrape_etf_holdings(ticker, redis_connection):
             holdings_dict.update(stock_dict)
 
         # Store JSON
-        json_val = json.dumps({"Holdings": holdings_dict}, indent=4, sort_keys=True)
+        python_dict = {"QueryDate": etf_date, "HoldingsLastUpdatedDate": etf_date,
+                       "Ticker": ticker, "Holdings": holdings_dict}
+        json_val = json.dumps(python_dict, indent=4)
 
         # Try Writing to redis
         try:
-            write_redis(redis_connection, ticker, json_val)
+            write_redis(redis_connection, ticker+"-"+todays_date, json_val)
         except RedisError:
+            pass
+
+        # Try Writing to mongo
+        try:
+            write_mongo(mongo_db, python_dict)
+        except MongoErrors.PyMongoError:
             pass
 
         # Return JSON Format
         return json_val
 
     # Return If Error
-    except:
+    except Exception:
         raise Exception('Error Fetching Data')
+
+
+def read_mongo(mongo_db, date, ticker):
+    """
+    Queries Mongo by Date and Ticker to return holdings data
+    :param: mongo_db - Mongo Connection
+    :param: date - Used in Query
+    :param: ticker - User In Query
+    :return: Returns Non JSON Date if Found, raises error if no database connection or something went wrong
+    """
+    if mongo_db:
+        try:
+            result = mongo_db.ETFHoldings.find_one({"QueryDate": date, "Ticker": ticker},
+                                                   {"_id": False, "Holdings": True})
+            return result
+        except MongoErrors:
+            raise MongoErrors.PyMongoError
+    else:
+        raise MongoErrors.PyMongoError
+
+
+def write_mongo(mongo_db, data):
+    """
+    Stores Holding Data in Mongo DB
+    :param: mongo_db - Mongo Connection
+    :param: data - JSON data
+
+    :return: Raises Error if bad connection or something went wrong
+    """
+    if mongo_db:
+        try:
+            mongo_db.ETFHoldings.insert(data, check_keys=False)
+        except MongoErrors:
+            raise MongoErrors.PyMongoError
+    else:
+        raise MongoErrors.PyMongoError
 
 
 def read_redis(redis_connection, key):
@@ -105,7 +172,7 @@ def read_redis(redis_connection, key):
     if redis_connection:
         try:
             return redis_connection.execute_command('JSON.GET', key)
-        except:
+        except RedisError:
             raise RedisError
     else:
         raise RedisError
@@ -123,9 +190,9 @@ def write_redis(redis_connection, key, data):
         try:
             redis_connection.execute_command('JSON.SET', key, '.', data)
             return None
-        except:
+        except RedisError:
             raise RedisError
     else:
         raise RedisError
 
-# print(scrape_etf_holdings("ZIG"))
+# print(scrape_etf_holdings("VOO", None, None))

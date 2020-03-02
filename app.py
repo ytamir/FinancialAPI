@@ -5,6 +5,7 @@ import json
 import os
 from PageCallbacks import Callbacks
 import pandas as pd
+from pymongo import MongoClient
 from redis import Redis
 
 # Read in files
@@ -19,8 +20,11 @@ app = Flask(__name__)
 cache = Cache(app, config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_HOST': os.getenv('REDIS_HOST')})
 cache_timeout = 86400# One Day
 redis_instance = Redis(host=os.getenv('REDIS_HOST'))
+mongo_client = MongoClient("mongodb+srv://"+os.getenv('MONGO_USERNAME')+":"+os.getenv('MONGO_PASSWORD') +
+                           "@financialappmongocluster-wdw1z.mongodb.net/test?retryWrites=true&w=majority")
+mongo_db = mongo_client['FinancialData']
 CORS(app)
-Callbacks.register_callbacks(app, cache, cache_timeout, redis_instance, symbols)
+Callbacks.register_callbacks(app, cache, cache_timeout, mongo_db, redis_instance, symbols)
 
 @app.route('/')
 def index():

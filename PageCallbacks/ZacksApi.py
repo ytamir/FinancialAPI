@@ -3,10 +3,11 @@ from PyhonRequestFiles import ZacksScraper
 import json
 
 
-def register_api(app, redis_instance):
+def register_api(app, mongo_db, redis_instance):
     """
     Registers API for Zacks which includes: ETF Holdings Endpoint
     :param app: Flask App
+    :param mongo_db: Mongo DB
     :param redis_instance: Redis DB
     """
 
@@ -23,7 +24,7 @@ def register_api(app, redis_instance):
                                        sort_keys=True), status=400)
         else:
             try:
-                success_json = ZacksScraper.scrape_etf_holdings(ticker, redis_instance)
+                success_json = ZacksScraper.scrape_etf_holdings(ticker, mongo_db, redis_instance)
                 return Response(success_json, status=200)
             except:
                 return Response(json.dumps({'HTTP ERROR 404': 'Error Fetching ETF Data'}, indent=4, sort_keys=True),
