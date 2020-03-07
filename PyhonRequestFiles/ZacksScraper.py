@@ -37,7 +37,9 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
     try:
         mongo_data = read_mongo(mongo_db, todays_date, ticker)
         if mongo_data is not None:
-            return json.dumps(mongo_data, indent=4)
+            mongo_json = json.dumps(mongo_data, indent=4)
+            write_redis(redis_connection, ticker + "-" + todays_date, mongo_json)
+            return mongo_json
     except MongoErrors.PyMongoError:
         pass
     try:
