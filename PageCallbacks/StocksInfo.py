@@ -1,12 +1,10 @@
-#!/usr/bin/env python
-from urllib.request import urlopen
-import json
+
 
 
 #!/usr/bin/env python
 from urllib.request import urlopen
 import json
-import string
+
 
 
 def register_callbacks(app):    

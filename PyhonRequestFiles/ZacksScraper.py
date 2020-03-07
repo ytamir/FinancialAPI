@@ -21,14 +21,19 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
                                       }
                         }
     """
-
     # Get Current Date For Querying Redis and Mongo
-    todays_date = date_library.today().strftime("%d/%m/%Y")
+    todays_date = date_library.today().strftime("%b %d, %Y")
 
     # Try Redis Read First
     try:
         redis_data = read_redis(redis_connection, ticker+"-"+todays_date)
         if redis_data is not None:
+            try:
+                mongo_data = read_mongo(mongo_db, todays_date, ticker)
+                if mongo_data is None:
+                    write_mongo(mongo_db, redis_data)
+            except MongoErrors.PyMongoError:
+                pass
             return redis_data
     except RedisError:
         pass
@@ -37,7 +42,12 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
     try:
         mongo_data = read_mongo(mongo_db, todays_date, ticker)
         if mongo_data is not None:
-            return json.dumps(mongo_data, indent=4)
+            mongo_json = json.dumps(mongo_data, indent=4)
+            try:
+                write_redis(redis_connection, ticker + "-" + todays_date, mongo_json)
+            except RedisError:
+                pass
+            return mongo_json
     except MongoErrors.PyMongoError:
         pass
     try:
@@ -101,19 +111,23 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
             holdings_dict.update(stock_dict)
 
         # Store JSON
-        python_dict = {"QueryDate": etf_date, "HoldingsLastUpdatedDate": etf_date,
+        python_dict = {"QueryDate": todays_date, "HoldingsLastUpdatedDate": etf_date,
                        "Ticker": ticker, "Holdings": holdings_dict}
         json_val = json.dumps(python_dict, indent=4)
 
-        # Try Writing to redis
+        # Try Writing to redis only if the data does not already exist
         try:
-            write_redis(redis_connection, ticker+"-"+todays_date, json_val)
+            redis_data = read_redis(redis_connection, ticker + "-" + todays_date)
+            if redis_data is None:
+                write_redis(redis_connection, ticker+"-"+todays_date, json_val)
         except RedisError:
             pass
 
-        # Try Writing to mongo
+        # Try Writing to mongo only if the data does not already exist
         try:
-            write_mongo(mongo_db, python_dict)
+            mongo_data = read_mongo(mongo_db, todays_date, ticker)
+            if mongo_data is None:
+                write_mongo(mongo_db, python_dict)
         except MongoErrors.PyMongoError:
             pass
 

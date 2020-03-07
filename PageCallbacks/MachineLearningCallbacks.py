@@ -1,5 +1,4 @@
 # import pandas as pd
-# import plotly.graph_objs as go
 # from PyhonRequestFiles.MachineLearning import ML
 
 # from dash.dependencies import Input, Output

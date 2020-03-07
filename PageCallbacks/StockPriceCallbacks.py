@@ -1,6 +1,5 @@
-import plotly.graph_objs as go
+
 from PyhonRequestFiles.StockPrice import Stocks
-from dash.dependencies import Input, Output
 import json
 
 #def register_callbacks(app):

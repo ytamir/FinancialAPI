@@ -1,18 +1,17 @@
 branch-defaults:
   master:
-    environment: FinancialAnalysis-dev
-    group_suffix: null
+    environment: FinancialAPI-dev
 global:
-  application_name: FinancialAnalysis
+  application_name: FinancialAPI
   branch: null
-  default_ec2_keyname: null
+  default_ec2_keyname: FinancialAPIBeanstalk
   default_platform: Python 3.6
-  default_region: us-west-2
+  default_region: us-east-1
   include_git_submodules: true
   instance_profile: null
   platform_name: null
   platform_version: null
-  profile: eb-cli
+  profile: null
   repository: null
   sc: git
   workspace_type: Application
