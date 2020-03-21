@@ -1,49 +1,36 @@
-import dash
-import dash_html_components as html
+from flask import Flask
 from flask_caching import Cache
+from flask_cors import CORS
+import json
 import os
-from PageLayouts import Layouts
 from PageCallbacks import Callbacks
 import pandas as pd
+from pymongo import MongoClient
 from redis import Redis
-from flask import Flask
 
 # Read in files
 nasdaq = pd.read_csv("CSVFiles/nasdaq.csv")
 nyse = pd.read_csv("CSVFiles/nyse.csv")
 
-# Homepage setup
+# Symbols
 symbols = nyse.Symbol.values.tolist() + nasdaq.Symbol.values.tolist()
 drop_down_symbols = [{'label': str(a), 'value': str(a)} for a in symbols]
 
-# Setup site
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+application  = Flask(__name__)
+cache = Cache(application , config={'CACHE_TYPE': 'redis', 'CACHE_REDIS_HOST': os.getenv('REDIS_HOST')})
+cache_timeout = 86400# One Day
+redis_instance = Redis(host=os.getenv('REDIS_HOST'))
+mongo_client = MongoClient("mongodb+srv://"+os.getenv('MONGO_USERNAME')+":"+os.getenv('MONGO_PASSWORD') +
+                           "@financialappmongocluster-wdw1z.mongodb.net/test?retryWrites=true&w=majority")
+mongo_db = mongo_client['FinancialData']
+CORS(application )
+Callbacks.register_callbacks(application , cache, cache_timeout, mongo_db, redis_instance, symbols)
 
-app = Flask(__name__)
 
+@application.route('/get/stock_tickers', methods=['GET','POST'])
+def show_post(post_id):
+  return json.dumps(drop_down_symbols)
 
-@app.route('/')
-def index():
-    return 'Server Works!'
+if __name__ == '__main__':
+    application .run()
 
-
-@app.route('/greet')
-def say_hello():
-    return 'Hello from Server'
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-# Setup cache
-# cache = Cache(app.server, config={
-#     'CACHE_TYPE': 'redis',
-#     'CACHE_REDIS_HOST': os.getenv('REDIS_HOST')
-# })
-# cache_timeout = 3600
-# redis_instance = Redis(host=os.getenv('REDIS_HOST'))
-# application = app.server
-#
-# # Setup the App Layout
-# app.layout = html.Div(children=Layouts.construct_layout(drop_down_symbols))
-# # Register Callbacks
-# Callbacks.register_callbacks(app, cache, cache_timeout, redis_instance)
-#
-# if __name__ == '__main__':
-#     application.run(debug=True, port=1025)

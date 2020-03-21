@@ -185,3 +185,8 @@ thumb
 sketch
 
 # End of https://www.gitignore.io/api/react,flask,python
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
