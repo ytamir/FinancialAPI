@@ -13,6 +13,7 @@ nasdaq = pd.read_csv("CSVFiles/nasdaq.csv")
 nyse = pd.read_csv("CSVFiles/nyse.csv")
 
 # Symbols
+
 symbols = nyse.Symbol.values.tolist() + nasdaq.Symbol.values.tolist()
 drop_down_symbols = [{'label': str(a), 'value': str(a)} for a in symbols]
 
