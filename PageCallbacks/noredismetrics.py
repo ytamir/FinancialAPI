@@ -9,7 +9,7 @@ def make_memoized_key():
     return request.full_path
 
 
-def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
+def register_callbacks(app, cache_timeout, redis_instance, symbols):
     """
     Used to register the API endpoint of the form "/financialy-metrics?stocks=CERN&metrics=REVENUE&frequency=ANNUAL"
     :param app: Flask App

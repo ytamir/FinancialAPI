@@ -1,26 +1,35 @@
 from flask import request, Response
 from PyhonRequestFiles import FinancialStatementsJSONParser
 import json
+from redis import RedisError
 from ConfigFiles import MetricsConfig
+import sys
 
 
 def make_memoized_key():
     """Method to create cache key for memoized data so we can include request parameters"""
     return request.full_path
 
-
-def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
+def register_callbacks(app, cache_timeout, redis_instance, symbols):
     """
     Used to register the API endpoint of the form "/financial-metrics?stocks=CERN&metrics=REVENUE&frequency=ANNUAL"
     :param app: Flask App
-    :param cache: Flask Cache
     :param cache_timeout: Flask cache timeout set at app level
     :param redis_instance: Redis instance for caching
     :param symbols: List of valid ticker symbols
     """
+
     @app.route('/financial-metrics', methods=['GET'])
-    @cache.cached(timeout=cache_timeout, key_prefix=make_memoized_key)
-    def plot_revenue():
+    def financial_metrics_endpoint():
+
+        # Initial Check for If We Can Use Redis Data
+        redis_offline = False
+        try:
+            redis_instance.execute_command('JSON.GET', "TEST")
+        except RedisError:
+            redis_offline = True
+            pass
+
         """Method to handle request for financial data"""
         return_data = []
 
@@ -34,30 +43,26 @@ def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
         # Validate data before proceeding
         # Check that all request parameters were passed in correctly
         if tickers is None or metrics is None or quarterly_annual is None:
-            return Response(json.dumps({'HTTP ERROR 400': 'Not all request parameters specified'}),
-                            status=400,
-                            mimetype="application/json")
+            return Response(json.dumps({'HTTP ERROR 400': 'Not all request parameters specified'}, indent=4,
+                                       sort_keys=True), status=400)
         # Validate Tickers
         for ticker in tickers:
             if ticker not in symbols:
                 tickers.remove(ticker)
         if not tickers:
-            return Response(json.dumps({'HTTP ERROR 400': 'Ticker Symbols are invalid'}),
-                            status=400,
-                            mimetype="application/json")
+            return Response(json.dumps({'HTTP ERROR 400': 'Ticker Symbols are invalid'}, indent=4,
+                                       sort_keys=True), status=400)
         # Validate Metrics
         for metric in metrics:
             if metric not in MetricsConfig.main_dictionary["all_metrics"]:
                 metrics.remove(metric)
         if not metrics:
-            return Response(json.dumps({'HTTP ERROR 400': 'Metrics are invalid'}),
-                            status=400,
-                            mimetype="application/json")
+            return Response(json.dumps({'HTTP ERROR 400': 'Metrics are invalid'}, indent=4,
+                                       sort_keys=True), status=400)
         # Check Frequency
         if quarterly_annual.upper() != "ANNUAL" and quarterly_annual.upper() != "QUARTERLY":
-            return Response(json.dumps({'HTTP ERROR 400': 'Frequency must be Quarterly or Annual'}),
-                            status=400,
-                            mimetype="application/json")
+            return Response(json.dumps({'HTTP ERROR 400': 'Frequency must be Quarterly or Annual'}, indent=4,
+                                       sort_keys=True), status=400)
 
         # Convert from string to int for handling request
         if quarterly_annual.upper() == "ANNUAL":
@@ -65,62 +70,59 @@ def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
         elif quarterly_annual.upper() == "QUARTERLY":
             quarterly_annual = 0
 
+        sys.stderr.write("HERE1")
+
+        symbols_to_ignore_for_metric = []
+        filtered_metrics = metrics
+        filtered_stocks = tickers
         # Retrieved cached data and append it to our return value
-        try:
+        if not redis_offline:
             for index, metric in enumerate(metrics):
                 for stock in tickers:
-                    dates_data = get_cached_data(stock, metric, quarterly_annual, redis_instance)
+                    try:
+                        dates_data = get_cached_data(stock, metric, quarterly_annual, redis_instance)
+                    except RedisError:
+                        continue
                     if dates_data[0] and dates_data[1]:
                         return_data.append({"ticker": stock, "metric": metric, "dates": dates_data[0],
                                             "data": dates_data[1]})
-        except Exception:
-            return Response(json.dumps({'HTTP ERROR 400': 'Error fetching cached data'}),
-                            status=400,
-                            mimetype="application/json")
 
-        # Get a list of symbols and metrics we can ignore for different metrics because of cached data
-        try:
+            # Get a list of symbols and metrics we can ignore for different metrics because of cached data
             symbols_to_ignore_for_metric = construct_symbols_to_ignore(tickers, metrics, quarterly_annual)
             filtered_metrics = [i for j, i in enumerate(metrics) if j not in indices_to_remove(metrics, tickers,
                                                                                                quarterly_annual,
                                                                                                remove_stocks=False)]
             filtered_stocks = [i for j, i in enumerate(tickers) if j not in indices_to_remove(tickers, metrics,
-                                                                                              quarterly_annual,
+                                                                                                  quarterly_annual,
                                                                                               remove_stocks=True)]
-        except Exception:
-            return Response(json.dumps({'HTTP ERROR 400': 'Error filtering stock symbols and metrics'}),
-                            status=400,
-                            mimetype="application/json")
 
         # Make API request with filtered data and symbols
         try:
             stock_data = FinancialStatementsJSONParser.fetch_data(quarterly_annual, filtered_metrics, filtered_stocks,
                                                                   symbols_to_ignore_for_metric)
+        # Api Request Failed, Return
         except Exception:
-            return Response(json.dumps({'HTTP ERROR 400': 'Error fetching data from API'}),
-                            status=400,
-                            mimetype="application/json")
-
+            return Response(json.dumps({'HTTP ERROR 400': 'Error Fetching Data From API'}, indent=4,
+                                       sort_keys=True), status=400)
+        # Append Result Data for returning
         for data in stock_data:
-            # Install data in redis cache for data we have not cached yet and add data to return
-            try:
 
-                cache_data(data, quarterly_annual, cache_timeout, redis_instance)
-                return_data.append({"ticker": data["SYMBOL"], "metric": data["METRIC"], "dates": data["DATES"],
-                                    "data": data["DATA"]})
-            except Exception:
-                return Response(json.dumps({'HTTP ERROR 400': 'Error Installing Data in the Cache'}),
-                                status=204,
-                                mimetype="application/json")
+            # Append to return data
+            return_data.append({"ticker": data["SYMBOL"], "metric": data["METRIC"], "dates": data["DATES"],
+                                "data": data["DATA"]})
+            # Try Install data in redis cache for data we have not cached yet and add data to return
+            try:
+                if not redis_offline:
+                    cache_data(data, quarterly_annual, cache_timeout, redis_instance)
+            except RedisError:
+                continue
 
         if not return_data:
-            return Response(json.dumps({'HTTP 204': 'No Data Found'}),
-                            status=204,
-                            mimetype="application/json")
+            return Response(json.dumps({'HTTP 204': 'No Data Found'}, indent=4,
+                                       sort_keys=True), status=204)
         else:
-            return Response(json.dumps({"return_data": return_data}),
-                            status=200,
-                            mimetype="application/json")
+            return Response(json.dumps({"return_data": return_data}, indent=4,
+                                       sort_keys=True), status=200)
 
     def cache_data(data, quarterly_or_annual, cache_expire, redis_connection):
         """
@@ -133,10 +135,13 @@ def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
         for data_item, date_item in zip(data["DATA"], data["DATES"]):
             data_key = construct_key(data["SYMBOL"], data["METRIC"], quarterly_or_annual, key_type_data=True)
             dates_key = construct_key(data["SYMBOL"], data["METRIC"], quarterly_or_annual, key_type_data=False)
-            redis_connection.lpush(dates_key, date_item)
-            redis_connection.expire(name=dates_key, time=cache_expire)
-            redis_connection.lpush(data_key, data_item)
-            redis_connection.expire(name=data_key, time=cache_expire)
+            try:
+                redis_connection.lpush(dates_key, date_item)
+                redis_connection.expire(name=dates_key, time=cache_expire)
+                redis_connection.lpush(data_key, data_item)
+                redis_connection.expire(name=data_key, time=cache_expire)
+            except RedisError:
+                raise RedisError
 
     def construct_symbols_to_ignore(stocks, metrics, quarterly_or_annual):
         """
@@ -151,9 +156,13 @@ def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
             for stock in stocks:
                 data_key = construct_key(stock, metric, quarterly_or_annual, key_type_data=True)
                 dates_key = construct_key(stock, metric, quarterly_or_annual, key_type_data=False)
-                # If both keys exist, we have the cached data
-                if redis_instance.exists(dates_key) and redis_instance.exists(data_key):
-                    symbols_to_ignore_for_metric.append(metric + "-" + stock)
+
+                try:
+                    # If both keys exist, we have the cached data
+                    if redis_instance.exists(dates_key) and redis_instance.exists(data_key):
+                        symbols_to_ignore_for_metric.append(metric + "-" + stock)
+                except RedisError:
+                    continue
 
         return symbols_to_ignore_for_metric
 
@@ -176,9 +185,13 @@ def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
         data_list = []
         data_key = construct_key(stock, metric, quarterly_or_annual, key_type_data=True)
         dates_key = construct_key(stock, metric, quarterly_or_annual, key_type_data=False)
-        if redis_connection.exists(dates_key) and redis_connection.exists(data_key):
-            dates_list = [x.decode('utf-8') for x in redis_connection.lrange(dates_key, 0, -1)]
-            data_list = [x.decode('utf-8') for x in redis_connection.lrange(data_key, 0, -1)]
+        try:
+            if redis_connection.exists(dates_key) and redis_connection.exists(data_key):
+                dates_list = [x.decode('utf-8') for x in redis_connection.lrange(dates_key, 0, -1)]
+                data_list = [x.decode('utf-8') for x in redis_connection.lrange(data_key, 0, -1)]
+        except RedisError:
+            raise RedisError
+
         return [dates_list, data_list]
 
     def indices_to_remove(list1, list2, quarterly_or_annual, remove_stocks):
@@ -201,8 +214,12 @@ def register_callbacks(app, cache, cache_timeout, redis_instance, symbols):
                     data_key = construct_key(value2, value1, quarterly_or_annual, key_type_data=True)
                     dates_key = construct_key(value2, value1, quarterly_or_annual, key_type_data=False)
 
-                # If the data does not exist for  some key we cannot remove anything
-                if not redis_instance.exists(dates_key) or not redis_instance.exists(data_key):
+                # If the data does not exist or we have a redis error for some key, we cannot remove anything
+                try:
+                    if not redis_instance.exists(dates_key) or not redis_instance.exists(data_key):
+                        remove = False
+                        break
+                except RedisError:
                     remove = False
                     break
             if remove:
