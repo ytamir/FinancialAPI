@@ -8,7 +8,7 @@ import requests
 import re
 
 
-def scrape_etf_holdings(ticker, mongo_db, redis_connection):
+def scrape_etf_holdings(ticker, mongo_db, logger, redis_connection):
     """
     This function takes in an ETF/Mutual Fund Ticker along with a boolean and returns json format for holding data
     from Zacks
@@ -21,35 +21,43 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
                                       }
                         }
     """
+
     # Get Current Date For Querying Redis and Mongo
     todays_date = date_library.today().strftime("%b %d, %Y")
 
+    if logger is not None:
+        logger.debug("Zacks API - Try Redis Cache Read")
     # Try Redis Read First
     try:
-        redis_data = read_redis(redis_connection, ticker+"-"+todays_date)
+        redis_data = read_redis(redis_connection, ticker+"-"+todays_date, logger)
         if redis_data is not None:
             try:
-                mongo_data = read_mongo(mongo_db, todays_date, ticker)
+                mongo_data = read_mongo(mongo_db, todays_date, ticker, logger)
                 if mongo_data is None:
-                    write_mongo(mongo_db, redis_data)
+                    write_mongo(mongo_db, redis_data, logger)
             except MongoErrors.PyMongoError:
                 pass
             return redis_data
     except RedisError:
         pass
 
+    if logger is not None:
+        logger.debug("Zacks API - Try Mongo Read")
     # Try Mongo Read Second
     try:
-        mongo_data = read_mongo(mongo_db, todays_date, ticker)
+        mongo_data = read_mongo(mongo_db, todays_date, ticker, logger)
         if mongo_data is not None:
             mongo_json = json.dumps(mongo_data, indent=4)
             try:
-                write_redis(redis_connection, ticker + "-" + todays_date, mongo_json)
+                write_redis(redis_connection, ticker + "-" + todays_date, mongo_json, logger)
             except RedisError:
                 pass
             return mongo_json
     except MongoErrors.PyMongoError:
         pass
+
+    if logger is not None:
+        logger.debug("Zacks API - Try Zacks Scrapping")
     try:
         # Make Request
         ua = Ua()
@@ -78,7 +86,7 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
         # Convert the javascript string to a python string using exec that will be stored in etf_holdings_table_header
         etf_date_text = "global etf_holdings_table_header; " + etf_date_text
         exec(etf_holdings_text)
-        exec(etf_date_text)
+        exec (etf_date_text)
 
         # Get ETF Date From the Table Header
         etf_date = etf_holdings_table_header.split("of ", 1)[1]
@@ -116,18 +124,22 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
         json_val = json.dumps(python_dict, indent=4)
 
         # Try Writing to redis only if the data does not already exist
+        if logger is not None:
+            logger.debug("Zacks API - Try Redis Write")
         try:
-            redis_data = read_redis(redis_connection, ticker + "-" + todays_date)
+            redis_data = read_redis(redis_connection, ticker + "-" + todays_date, logger)
             if redis_data is None:
-                write_redis(redis_connection, ticker+"-"+todays_date, json_val)
+                write_redis(redis_connection, ticker+"-"+todays_date, json_val, logger)
         except RedisError:
             pass
 
         # Try Writing to mongo only if the data does not already exist
+        if logger is not None:
+            logger.debug("Zacks API - Try Mongo Write")
         try:
-            mongo_data = read_mongo(mongo_db, todays_date, ticker)
+            mongo_data = read_mongo(mongo_db, todays_date, ticker, logger)
             if mongo_data is None:
-                write_mongo(mongo_db, python_dict)
+                write_mongo(mongo_db, python_dict, logger)
         except MongoErrors.PyMongoError:
             pass
 
@@ -136,10 +148,12 @@ def scrape_etf_holdings(ticker, mongo_db, redis_connection):
 
     # Return If Error
     except Exception:
+        if logger is not None:
+            logger.debug("Zacks API - General Exception")
         raise Exception('Error Fetching Data')
 
 
-def read_mongo(mongo_db, date, ticker):
+def read_mongo(mongo_db, date, ticker, logger):
     """
     Queries Mongo by Date and Ticker to return holdings data
     :param: mongo_db - Mongo Connection
@@ -152,13 +166,17 @@ def read_mongo(mongo_db, date, ticker):
             result = mongo_db.ETFHoldings.find_one({"QueryDate": date, "Ticker": ticker},
                                                    {"_id": False, "Holdings": True})
             return result
-        except MongoErrors:
+        except Exception:
+            if logger is not None:
+                logger.debug("Zacks API - Mongo Read Error")
             raise MongoErrors.PyMongoError
     else:
+        if logger is not None:
+            logger.debug("Zacks API - Mongo Not Connected")
         raise MongoErrors.PyMongoError
 
 
-def write_mongo(mongo_db, data):
+def write_mongo(mongo_db, data, logger):
     """
     Stores Holding Data in Mongo DB
     :param: mongo_db - Mongo Connection
@@ -169,13 +187,17 @@ def write_mongo(mongo_db, data):
     if mongo_db:
         try:
             mongo_db.ETFHoldings.insert(data, check_keys=False)
-        except MongoErrors:
+        except Exception:
+            if logger is not None:
+                logger.debug("Zacks API - Mongo Insert Error")
             raise MongoErrors.PyMongoError
     else:
+        if logger is not None:
+            logger.debug("Zacks API - Mongo Not Connected")
         raise MongoErrors.PyMongoError
 
 
-def read_redis(redis_connection, key):
+def read_redis(redis_connection, key, logger):
     """
     Collects Data from Redis Database
     :param: redis_connection - Redis Connection
@@ -186,13 +208,17 @@ def read_redis(redis_connection, key):
     if redis_connection:
         try:
             return redis_connection.execute_command('JSON.GET', key)
-        except RedisError:
+        except Exception:
+            if logger is not None:
+                logger.debug("Zacks API - Redis Read Error")
             raise RedisError
     else:
+        if logger is not None:
+            logger.debug("Zacks API - Redis Not Connected")
         raise RedisError
 
 
-def write_redis(redis_connection, key, data):
+def write_redis(redis_connection, key, data, logger):
     """
     Stores Data in Redis Database
     :param: redis_connection - Redis Connection
@@ -204,9 +230,13 @@ def write_redis(redis_connection, key, data):
         try:
             redis_connection.execute_command('JSON.SET', key, '.', data)
             return None
-        except RedisError:
+        except Exception:
+            if logger is not None:
+                logger.debug("Zacks API - Redis Write Error")
             raise RedisError
     else:
+        if logger is not None:
+            logger.debug("Zacks API - Redis Not Connected")
         raise RedisError
 
 # print(scrape_etf_holdings("VOO", None, None))
