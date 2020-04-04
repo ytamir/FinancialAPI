@@ -3,7 +3,6 @@ from PyhonRequestFiles import FinancialStatementsJSONParser
 import json
 from redis import RedisError
 from ConfigFiles import MetricsConfig
-import sys
 
 
 def make_memoized_key():
@@ -69,8 +68,6 @@ def register_callbacks(app, cache_timeout, redis_instance, symbols):
             quarterly_annual = 1
         elif quarterly_annual.upper() == "QUARTERLY":
             quarterly_annual = 0
-
-        sys.stderr.write("HERE1")
 
         symbols_to_ignore_for_metric = []
         filtered_metrics = metrics

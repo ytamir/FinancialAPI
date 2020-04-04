@@ -41,9 +41,9 @@ def build_url(quarterly_annual, metrics, stocks, symbols_to_ignore_for_metric):
                 else:
                     url = url[:-1]
                     url += "?period="
-                    if quarterly_annual == MetricsConfig.Frequencies.QUARTERLY:
+                    if quarterly_annual == MetricsConfig.Frequencies.QUARTERLY.value:
                         url += "quarter"
-                    elif quarterly_annual == MetricsConfig.Frequencies.ANNUAL:
+                    elif quarterly_annual == MetricsConfig.Frequencies.ANNUAL.value:
                         url += "annual"
         # If url is found, append a new dictionary with the url and the metric, else just add the metric to the list
         # associated with the url
