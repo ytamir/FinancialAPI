@@ -5,7 +5,7 @@ dnspython==1.16.0
 fake-useragent==0.1.11
 Flask==1.1.1
 Flask-Compress==1.4.0
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 Flask_Redis==0.4.0
 gast==0.2.2
 numpy==1.17.3
