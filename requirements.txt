@@ -12,7 +12,7 @@ numpy==1.17.3
 matplotlib==3.1.1
 pandas==0.23.4
 pandas-datareader==0.7.0
-pipenv==2018.11.26
+pipenv==2022.1.8
 pylint==2.4.2
 pylint_runner==0.5.4
 pymongo==3.10.1
